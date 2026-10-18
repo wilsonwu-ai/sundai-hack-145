@@ -1,6 +1,6 @@
 # ChipletChill: beat the hotspot
 
-**Score 0.96771 on the organizer's HotSpot pipeline (64 x 64 mesh), below the seeded baseline (1.0) and below the 0.96846 that led the AutoLab leaderboard at noon.**
+**#1 on the AutoLab `beat-the-hotspot` leaderboard: score 0.96770951** (seeded baseline 1.0, lower is better).
 Hottest GPU 102.02 C, hottest memory stack 95.28 C. Lower is better.
 
 **[Open the app](https://wilsonwu-ai.github.io/sundai-hack-145/)** · **[ELI5 explainer + video](https://wilsonwu-ai.github.io/sundai-hack-145/explainer.html)** · Built at [Sundai Hack 145](https://www.sundai.club), MIT CSAIL, 18 Oct 2026 · Track 2: *Design the coolest chiplet layout* · AutoLab hill [`czaja107/beat-the-hotspot`](https://app.autolab.ai/hills/czaja107/beat-the-hotspot)
@@ -17,15 +17,18 @@ Every number below is a HotSpot result from the organizer's own pipeline (their 
 
 | Run | Score (64 x 64) | Hottest GPU C | Hottest HBM C |
 |---|---|---|---|
-| **ChipletChill, HotSpot polish** | **0.96771** | 102.02 | 95.28 |
-| czaja107, AutoLab #1 at noon | 0.96846 | 102.08 | 94.13 |
+| **wilsonwu-ai (ours), AutoLab #1** | **0.96771** | 102.02 | 95.28 |
+| ottogin, AutoLab #2 | 0.96796 | 102.04 | 93.39 |
+| czaja107, AutoLab #3 | 0.96846 | 102.08 | 94.13 |
 | ChipletChill, surrogate loop v2 only | 0.97399 | 102.52 | 94.47 |
 | Best of 66 random legal layouts | 0.97851 | 102.88 | 95.81 |
 | Seeded random baseline | 1.0 | 104.59 | 97.68 |
 
 - **128 x 128 final mesh:** 0.9705 for the 0.96784 layout. The finer mesh takes back part of the margin, which is what the final pass is for.
 - **Local judge calibration:** our macOS build of the bundled HotSpot reproduces the baseline exactly (104.59 / 97.68 C, score 1.0), see `scripts/official/calibrate.sh` and `state/official/calibration.jsonl`.
-- **Official AutoLab run:** submitted to our climb; the leaderboard is the source of truth once it posts.
+- **Official AutoLab run:** 0.96770951, identical to our local judge.
+
+![AutoLab leaderboard](public/media/leaderboard.png)
 
 ## How it works: trading accuracy for speed
 
