@@ -32,6 +32,14 @@
    "hbm": 95.11,
    "submission": "state/official/subs/cand_3.json",
    "public": false
+  },
+  {
+   "experiment": "2318b2e4",
+   "score": 0.96406584,
+   "gpu": 101.73,
+   "hbm": 94.94,
+   "submission": "state/official/subs/cand_4.json",
+   "public": false
   }
  ],
  "note": "public=false: layout held back until the hack ends (the board was moving minute by minute); the score is official either way."
