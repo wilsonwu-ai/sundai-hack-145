@@ -81,6 +81,15 @@
    "submission": "state/official/subs/cand_9.json",
    "public": false,
    "note": "This layout came from an OpenAI Codex agent we ran in parallel with the same tools, rules and seed layouts: it moved G0 up one HotSpot grid row (0.656 mm) and shifted the right-hand dies outward by 0.4 to 0.6 mm, using 13,499.7 of the 13,500 wire budget."
+  },
+  {
+   "experiment": "eeb8c4d9",
+   "score": 0.95916572,
+   "gpu": 101.34,
+   "hbm": 94.71,
+   "submission": "state/official/subs/cand_10.json",
+   "public": false,
+   "note": "The big late step came from an OpenAI Codex agent we ran in parallel with the same tools, rules and seed layouts: it moved G0 up one HotSpot grid row (0.656 mm) and shifted the right-hand dies outward by 0.4 to 0.6 mm (0.95929 on AutoLab). Our unrounded-HotSpot polish then moved H2 0.5 mm, one more 0.01 C off the hottest GPU."
   }
  ],
  "note": "public=false: layout held back until the hack ends (the board was moving minute by minute); the score is official either way."
