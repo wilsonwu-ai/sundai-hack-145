@@ -30,7 +30,7 @@ const PRESETS: { id: string; label: string; layout: Layout }[] = [
 // layouts this close, so when one of these is loaded the verified number is shown next to the estimate.
 const VERIFIED: { layout: Layout; score: number; gpu: number; hbm: number }[] = [
   { layout: BASELINE, score: 1.0, gpu: 104.59, hbm: 97.68 },
-  { layout: best, score: 0.96696, gpu: 101.96, hbm: 95.18 },
+  { layout: best, score: 0.96582, gpu: 101.87, hbm: 95.16 },
 ]
 const sameLayout = (a: Layout, b: Layout) =>
   Object.keys(b).every((d) => a[d] && Math.abs(a[d][0] - b[d][0]) < 5e-4 && Math.abs(a[d][1] - b[d][1]) < 5e-4)

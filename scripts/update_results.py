@@ -26,6 +26,7 @@ runs = json.loads((ST / "autolab_runs.json").read_text())
 conv = json.loads((ST / "convergence_check.json").read_text())
 ours = runs["runs"][-1]          # newest official run = the one on the board
 first = runs["runs"][0]
+pub = [r for r in runs["runs"] if r.get("public", True)][-1]   # newest run whose layout is public
 rows = snap["rows"]
 me = next(r for r in rows if r["climber"] == "wilsonwu-ai")
 others = [r for r in rows if r["climber"] != "wilsonwu-ai"]
@@ -98,7 +99,11 @@ fine_md = (f"5. **Fine polish below the rounding step.** `scripts/official/fine.
            f"binding workloads, re-checks the best few on all five, and keeps a move only if the unrounded worst case "
            f"drops. {moved_txt} {s5(first['score'])} to "
            f"{s5(ours['score'])}, confirmed by the unmodified judge and by AutoLab.")
-limits_md = (f"- {lead}\n"
+held = [r for r in runs["runs"] if not r.get("public", True)]
+held_txt = (f"The layout behind {', '.join(s5(r['score']) for r in held)} is held back until the hack ends, so "
+            f"nobody starts from it mid-race; the app and `src/official/data/best.json` carry our best public layout "
+            f"({s5(pub['score'])}). Every score above is official either way." if held else "")
+limits_md = (f"- {lead}\n" + (f"- {held_txt}\n" if held else "") +
              f"- The last stage ranks candidates on unrounded HotSpot output from a private build. Every number we "
              f"report comes from the unmodified judge and from AutoLab. HotSpot's default stopping rule leaves about "
              f"{err:.4f} C of error on the binding die (`state/official/convergence_check.json`), much smaller than the "
@@ -126,7 +131,7 @@ blocks_html = {
              f"only when the unrounded worst case over all five workloads dropped. {moved_txt} "
              f"That took the score from {s5(first['score'])} to <b>{s5(ours['score'])}</b>, confirmed by "
              f"the unmodified judge and by AutoLab.</li>"),
-    "limits": (f"<li>{lead}</li>\n    <li>The last stage ranks candidates on unrounded output from a private "
+    "limits": (f"<li>{lead}</li>\n" + (f"    <li>{held_txt}</li>\n" if held else "") + f"    <li>The last stage ranks candidates on unrounded output from a private "
                f"HotSpot build. Every number on this page comes from the unmodified judge and from AutoLab. HotSpot's "
                f"default stopping rule leaves about {err:.4f} C of error on the binding die "
                f"(state/official/convergence_check.json), much smaller than the {c2(first['gpu'] - ours['gpu'])} C "
@@ -162,12 +167,12 @@ d = json.loads(vd.read_text())
 d.update({"best_score": round(ours["score"], 5), "best_gpu_c": ours["gpu"], "best_hbm_c": ours["hbm"]})
 vd.write_text(json.dumps(d, indent=1) + "\n")
 
-sub = json.loads((ROOT / ours["submission"]).read_text())["placements_mm"]
+sub = json.loads((ROOT / pub["submission"]).read_text())["placements_mm"]
 (ROOT / "src" / "official" / "data" / "best.json").write_text(json.dumps(sub, indent=1) + "\n")
 app = ROOT / "src" / "ui" / "app.ts"
 at = app.read_text()
 at, n = re.subn(r"\{ layout: best, score: [0-9.]+, gpu: [0-9.]+, hbm: [0-9.]+ \}",
-                f"{{ layout: best, score: {round(ours['score'], 5)}, gpu: {ours['gpu']}, hbm: {ours['hbm']} }}", at)
+                f"{{ layout: best, score: {round(pub['score'], 5)}, gpu: {pub['gpu']}, hbm: {pub['hbm']} }}", at)
 assert n == 1, "verified-badge entry for best not found in app.ts"
 app.write_text(at)
 print(f"updated: rank #{me['rank']} at {T} ET, score {ours['score']}, lead {steps} steps over {best_other['climber']}")
