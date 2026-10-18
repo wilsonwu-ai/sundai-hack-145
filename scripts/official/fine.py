@@ -82,8 +82,8 @@ def search(a, start):
     OUT.mkdir(parents=True, exist_ok=True)
     log = (OUT / f"search_{a.tag}.jsonl").open("a")
     pool = ThreadPoolExecutor(a.jobs)
-    dies = a.dies.split(",")
-    diag = a.diag.split(",") if a.diag else []
+    dies = [d for d in a.dies.split(",") if d]
+    diag = [d for d in a.diag.split(",") if d]
     groups = [g.split("+") for g in a.groups.split(";") if g]
     cur = start
     full = hp.evaluate(cur, jobs=5)

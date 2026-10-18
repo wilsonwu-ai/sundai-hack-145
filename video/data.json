@@ -1,7 +1,7 @@
 {
- "best_score": 0.96582,
- "best_gpu_c": 101.87,
- "best_hbm_c": 95.16,
+ "best_score": 0.96482,
+ "best_gpu_c": 101.79,
+ "best_hbm_c": 95.11,
  "baseline_score": 1.0,
  "baseline_gpu_c": 104.59,
  "baseline_hbm_c": 97.68,

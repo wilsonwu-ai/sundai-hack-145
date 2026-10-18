@@ -13,3 +13,4 @@ state/official/subs/cand_[2-9]*.json
 state/official/subs/fine_*.json
 state/official/fine_*.log
 state/official/confirm_*.log
+state/official/subs/start*.json
