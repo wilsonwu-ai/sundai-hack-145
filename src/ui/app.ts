@@ -137,9 +137,9 @@ export function mountApp(root: HTMLElement): void {
       <h2>What you're looking at</h2>
       <ul>
         <li>The package is modelled as a 2D heat-spreading plate: each chiplet injects watts, the interposer spreads them sideways and drops heat into the coolant.</li>
-        <li>The full solver is the ground truth. It takes about 11 ms per layout.</li>
+        <li>The full solver is the ground truth. It takes about 3 ms per layout.</li>
         <li>The surrogate is a small model trained in your browser. It only proposes layouts; it never gets the last word.</li>
-        <li>Every temperature shown here is re-checked by the full solver, and every layout stays inside the wire budget.</li>
+        <li>Every temperature shown here is re-checked by the full solver, and every AI layout stays inside the wire budget.</li>
       </ul>
       <p><a href="${REPO}/blob/main/research/brief.md" target="_blank" rel="noopener">Sources and assumptions (research/brief.md)</a></p>
     </section>

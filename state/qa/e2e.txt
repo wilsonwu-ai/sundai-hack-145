@@ -1,0 +1,13 @@
+
+Running 8 tests using 2 workers
+
+  ✓  1 [desktop] › tests/e2e/app.spec.ts:5:1 › loads and shows a plausible peak (109ms)
+  ✓  2 [mobile] › tests/e2e/app.spec.ts:5:1 › loads and shows a plausible peak (113ms)
+  ✓  3 [desktop] › tests/e2e/app.spec.ts:13:1 › workload change moves the peak (202ms)
+  ✓  4 [mobile] › tests/e2e/app.spec.ts:13:1 › workload change moves the peak (203ms)
+  ✓  5 [desktop] › tests/e2e/app.spec.ts:20:1 › optimizer produces a cooler layout (3.2s)
+  ✓  6 [mobile] › tests/e2e/app.spec.ts:20:1 › optimizer produces a cooler layout (3.3s)
+  ✓  7 [desktop] › tests/e2e/app.spec.ts:36:1 › no horizontal overflow (92ms)
+  ✓  8 [mobile] › tests/e2e/app.spec.ts:36:1 › no horizontal overflow (82ms)
+
+  8 passed (4.3s)
