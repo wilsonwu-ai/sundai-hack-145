@@ -63,7 +63,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
   <p class="kicker" style="margin-top:20px">Sundai Hack 145 &middot; Track 2 &middot; STAR explainer</p>
   <h1>ChipletChill: <em>beat the hotspot</em></h1>
   <!-- results:headline -->
-<p class="lead"><b>#1 on the AutoLab beat-the-hotspot leaderboard</b> at 14:33 ET on 18 Oct, score <b>0.96281</b> (baseline 1.0, lower is better). Next: frido22 at 0.96482.</p>
+<p class="lead"><b>#1 on the AutoLab beat-the-hotspot leaderboard</b> at 14:41 ET on 18 Oct, score <b>0.96231</b> (baseline 1.0, lower is better). Next: frido22 at 0.96469.</p>
   <!-- /results:headline -->
   <div class="btns">
     <a class="btn primary" href="./">Open the app</a>
@@ -278,7 +278,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
     <li><b>v2: a trust region and a local residual correction.</b> The trust region keeps the search close to layouts HotSpot has already checked. The residual correction fixes the surrogate's error near those layouts. Best score: 0.9740.</li>
     <li><b>Polish.</b> The score is set by one die: G0 in the skewed_compute workload. We ran HotSpot on moves of that die directly. That took the score to <b>0.96771</b>.</li>
     <!-- results:fine -->
-<li><b>Fine polish below the rounding step.</b> The judge rounds every die temperature to 0.01 C, so the polish stalled on flat steps it could not see past. We built a private HotSpot copy that prints 6 decimals instead of 2 (one format string changed, same solver) and searched on that, keeping a move only when the unrounded worst case over all five workloads dropped. The winning moves touched G1, H1, G2, H2, G3, H3; G0, the die that sets the score, never moved. That took the score from 0.96771 to <b>0.96281</b>, confirmed by the unmodified judge and by AutoLab.</li>
+<li><b>Fine polish below the rounding step.</b> The judge rounds every die temperature to 0.01 C, so the polish stalled on flat steps it could not see past. We built a private HotSpot copy that prints 6 decimals instead of 2 (one format string changed, same solver) and searched on that, keeping a move only when the unrounded worst case over all five workloads dropped. The winning moves touched G1, H1, G2, H2, G3, H3; G0, the die that sets the score, never moved. That took the score from 0.96771 to <b>0.96231</b>, confirmed by the unmodified judge and by AutoLab.</li>
     <!-- /results:fine -->
   </ul>
 </section>
@@ -287,14 +287,14 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
   <p class="kicker"><span class="star-tag">R</span>Result</p>
   <h2>Scoreboard</h2>
   <!-- results:board -->
-<p class="big">Our best score 0.96281. Hottest GPU 101.63 C. Hottest HBM 94.84 C.</p>
+<p class="big">Our best score 0.96231. Hottest GPU 101.59 C. Hottest HBM 94.73 C.</p>
   <div class="tablewrap">
     <table>
       <thead><tr><th>Run</th><th>Score</th><th>Hottest GPU C</th><th>Hottest HBM C</th></tr></thead>
       <tbody>
-        <tr><td>wilsonwu-ai (ours), AutoLab #1</td><td><b>0.96281</b></td><td>101.63</td><td>94.84</td></tr>
-        <tr><td>frido22, AutoLab #2</td><td>0.96482</td><td>101.79</td><td>93.77</td></tr>
-        <tr><td>vyahhi, AutoLab #3</td><td>0.96658</td><td>101.93</td><td>93.26</td></tr>
+        <tr><td>wilsonwu-ai (ours), AutoLab #1</td><td><b>0.96231</b></td><td>101.59</td><td>94.73</td></tr>
+        <tr><td>frido22, AutoLab #2</td><td>0.96469</td><td>101.78</td><td>93.88</td></tr>
+        <tr><td>vyahhi, AutoLab #3</td><td>0.96495</td><td>101.80</td><td>92.87</td></tr>
         <tr><td>ottogin, AutoLab #4</td><td>0.96796</td><td>102.04</td><td>93.39</td></tr>
         <tr><td>czaja107, AutoLab #5</td><td>0.96846</td><td>102.08</td><td>94.13</td></tr>
         <tr><td>Ours, first AutoLab submission (HotSpot polish)</td><td>0.96771</td><td>102.02</td><td>95.28</td></tr>
@@ -306,8 +306,8 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
   </div>
   <!-- /results:board -->
   <!-- results:official -->
-<p>Local HotSpot judge vs AutoLab official: identical, every time. AutoLab scored our layouts 0.96280940 and 0.96343762 and 0.96406584 and 0.96481970 and 0.96582485 and 0.96695565 and 0.96770951, the same values our local HotSpot twin computed. The twin reproduces the baseline exactly (104.59 / 97.68 C, score 1.0).</p>
-  <p><img src="./media/leaderboard.png" alt="AutoLab leaderboard at 14:33 ET: wilsonwu-ai #1 at 0.96280940, frido22 #2 at 0.96481970, vyahhi #3 at 0.96657872" style="max-width:100%;border-radius:8px"></p>
+<p>Local HotSpot judge vs AutoLab official: identical, every time. AutoLab scored our layouts 0.96230682 and 0.96280940 and 0.96343762 and 0.96406584 and 0.96481970 and 0.96582485 and 0.96695565 and 0.96770951, the same values our local HotSpot twin computed. The twin reproduces the baseline exactly (104.59 / 97.68 C, score 1.0).</p>
+  <p><img src="./media/leaderboard.png" alt="AutoLab leaderboard at 14:41 ET: wilsonwu-ai #1 at 0.96230682, frido22 #2 at 0.96469406, vyahhi #3 at 0.96494534" style="max-width:100%;border-radius:8px"></p>
   <!-- /results:official -->
   <p class="cap">The seeded baseline is 104.59 C (GPU) and 97.68 C (HBM), score 1.0. Lower is better.</p>
 
@@ -327,9 +327,9 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
     <li>The surrogate is a low-fidelity model on a 1 mm grid, with an affine correction (a straight-line fix per die class and workload). The estimates the app shows are estimates.</li>
     <li>Every ranking number comes from HotSpot, not from the surrogate.</li>
     <!-- results:limits -->
-<li>We lead by 16 rounding steps at 14:33 ET: 101.63 C against 101.79 C on the hottest GPU. The judge rounds every die temperature to 0.01 C, so the board moves in steps of 0.000126, and it moved all afternoon.</li>
-    <li>The layout behind 0.96482, 0.96407, 0.96344, 0.96281 is held back until the hack ends, so nobody starts from it mid-race; the app and `src/official/data/best.json` carry our best public layout (0.96582). Every score above is official either way.</li>
-    <li>The last stage ranks candidates on unrounded output from a private HotSpot build. Every number on this page comes from the unmodified judge and from AutoLab. HotSpot's default stopping rule leaves about 0.0023 C of error on the binding die (state/official/convergence_check.json), much smaller than the 0.39 C this stage found.</li>
+<li>We lead by 19 rounding steps at 14:41 ET: 101.59 C against 101.78 C on the hottest GPU. The judge rounds every die temperature to 0.01 C, so the board moves in steps of 0.000126, and it moved all afternoon.</li>
+    <li>The layout behind 0.96482, 0.96407, 0.96344, 0.96281, 0.96231 is held back until the hack ends, so nobody starts from it mid-race; the app and `src/official/data/best.json` carry our best public layout (0.96582). Every score above is official either way.</li>
+    <li>The last stage ranks candidates on unrounded output from a private HotSpot build. Every number on this page comes from the unmodified judge and from AutoLab. HotSpot's default stopping rule leaves about 0.0023 C of error on the binding die (state/official/convergence_check.json), much smaller than the 0.43 C this stage found.</li>
     <!-- /results:limits -->
     <li>Check on the 128 x 128 mesh: 0.9705 for the earlier 0.96784 layout. The finer mesh takes back part of the margin, which is exactly what the final pass is for.</li>
     <li>Temperatures are relative benchmark values from the organizer's setup, not calibrated chip temperatures.</li>
