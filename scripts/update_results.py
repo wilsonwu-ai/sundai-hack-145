@@ -85,7 +85,9 @@ else:
     lead = (f"We are {-steps} rounding steps behind {best_other['climber']} at {T} ET ({c2(ours['gpu'])} C against "
             f"{c2(best_other['gpu'])} C on the hottest GPU).{held1_txt} The judge rounds every die temperature to 0.01 C, "
             f"so the board moves in steps of {STEP:.6f}.")
-    card_rank = f"#{me['rank']} on the AutoLab beat-the-hotspot leaderboard ({s5(ours['score'])} at {T} ET)"
+    card_rank = (f"Held #1 on the AutoLab beat-the-hotspot leaderboard from {held1[0]} to at least {held1[-1]} ET; #{me['rank']} at {T} ET "
+                 f"({s5(ours['score'])})" if held1 else
+                 f"#{me['rank']} on the AutoLab beat-the-hotspot leaderboard ({s5(ours['score'])} at {T} ET)")
 
 board = [(f"{r['climber']}{' (ours)' if r['climber'] == 'wilsonwu-ai' else ''}, AutoLab #{r['rank']}",
           r["score"], r["gpu"], r["hbm"], r["climber"] == "wilsonwu-ai") for r in rows[:5]]
@@ -112,7 +114,7 @@ fine_md = (f"5. **Fine polish below the rounding step.** `scripts/official/fine.
            f"(one format string changed, same solver). The search moves one die or a group of dies, screens on the "
            f"binding workloads, re-checks the best few on all five, and keeps a move only if the unrounded worst case "
            f"drops. {moved_txt} {s5(first['score'])} to "
-           f"{s5(ours['score'])}, confirmed by the unmodified judge and by AutoLab.")
+           f"{s5(ours['score'])}, confirmed by the unmodified judge and by AutoLab." + (f" {ours['note']}" if ours.get("note") else ""))
 held = [r for r in runs["runs"] if not r.get("public", True)]
 def held_txt(code):
     return (f"The exact layouts behind {', '.join(s5(r['score']) for r in held)} are held back until the hack ends, "
@@ -167,7 +169,7 @@ blocks_html = {
              f"6 decimals instead of 2 (one format string changed, same solver) and searched on that, keeping a move "
              f"only when the unrounded worst case over all five workloads dropped. {moved_txt} "
              f"That took the score from {s5(first['score'])} to <b>{s5(ours['score'])}</b>, confirmed by "
-             f"the unmodified judge and by AutoLab.</li>"),
+             f"the unmodified judge and by AutoLab." + (f" {ours['note']}" if ours.get("note") else "") + "</li>"),
     "limits": (f"<li>{lead}</li>\n" + (f"    <li>{held_txt(html_code)}</li>\n" if held else "") + f"    <li>The last stage ranks candidates on unrounded output from a private "
                f"HotSpot build. Every number on this page comes from the unmodified judge and from AutoLab. "
                f"{conv_txt} ({html_code('state/official/convergence_check.json')}), much smaller than the "
@@ -195,7 +197,7 @@ ct = re.sub(r"(\*\*Preview \(one line, result first\):\*\*\n).*?\n",
             lambda m: m.group(1) + f"{card_rank}: a physics surrogate finds the layout, HotSpot proves it.\n", ct, flags=re.S)
 ct = re.sub(r"Result on the organizer's HotSpot pipeline \(64 x 64\):.*?\n",
             f"Result on the organizer's HotSpot pipeline (64 x 64): {s5(ours['score'])} (GPU {c2(ours['gpu'])} C, "
-            f"HBM {c2(ours['hbm'])} C), {card_rank.split(' (')[0]} at {T} ET, official score identical to our local "
+            f"HBM {c2(ours['hbm'])} C), #{me['rank']} on the AutoLab beat-the-hotspot leaderboard at {T} ET, official score identical to our local "
             f"judge.\n", ct)
 ct, n = re.subn(r"finds the last [0-9.]+ C on the hottest GPU \([0-9.]+ C to [0-9.]+ C\)",
                 f"finds the last {c2(first['gpu'] - ours['gpu'])} C on the hottest GPU ({c2(first['gpu'])} C to "

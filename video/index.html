@@ -285,8 +285,8 @@ if (num(D.best_score)) {
 T.fromTo('#score', {scale: .7, svgOrigin: '1380 560'}, {scale: 1, duration: 1.0, ease: 'elastic.out(1,.5)', immediateRender: false}, 40.2);
 // score bar baseline: 1.0 maps to the tick, bar starts at baseline
 (function(){ const w = 716/1.2*1.0; $('scoreBar').setAttribute('width', w); $('baseTick').setAttribute('x1', 1022 + w); $('baseTick').setAttribute('x2', 1022 + w); })();
-$('gpuT').textContent = num(D.best_gpu_c) ? (+D.best_gpu_c).toFixed(1) + '°C' : String(D.best_gpu_c);
-$('hbmT').textContent = num(D.best_hbm_c) ? (+D.best_hbm_c).toFixed(1) + '°C' : String(D.best_hbm_c);
+$('gpuT').textContent = num(D.best_gpu_c) ? (+D.best_gpu_c).toFixed(2) + '°C' : String(D.best_gpu_c);
+$('hbmT').textContent = num(D.best_hbm_c) ? (+D.best_hbm_c).toFixed(2) + '°C' : String(D.best_hbm_c);
 T.to({}, {duration: .01}, 44);
 
 window.DURATION = 44;

@@ -10,6 +10,8 @@ __pycache__/
 # held until the hack ends (latest layouts); remove these lines to publish
 state/official/fine/
 state/official/subs/cand_[2-9]*.json
+state/official/subs/cand_1[0-9]*.json
+state/official/subs/codex*.json
 state/official/subs/fine_*.json
 state/official/fine_*.log
 state/official/confirm_*.log

@@ -72,6 +72,15 @@
    "hbm": 94.72,
    "submission": "state/official/subs/cand_8.json",
    "public": false
+  },
+  {
+   "experiment": "28af609b",
+   "score": 0.95929137,
+   "gpu": 101.35,
+   "hbm": 94.64,
+   "submission": "state/official/subs/cand_9.json",
+   "public": false,
+   "note": "This layout came from an OpenAI Codex agent we ran in parallel with the same tools, rules and seed layouts: it moved G0 up one HotSpot grid row (0.656 mm) and shifted the right-hand dies outward by 0.4 to 0.6 mm, using 13,499.7 of the 13,500 wire budget."
   }
  ],
  "note": "public=false: layout held back until the hack ends (the board was moving minute by minute); the score is official either way."
