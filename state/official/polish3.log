@@ -1,0 +1,11 @@
+start 0.96783516 (0.9678351551702475, 'skewed_compute', 'G0')
+iter 0 cand 8 binding-only 0.96758 full 0.97166
+iter 0 cand 2 binding-only 0.96771 full 0.96771
+ITER 0 step 0.3 score 0.96770951 (0.9677095112451312, 'skewed_compute', 'G0')
+iter 1 cand 6 binding-only 0.96746 full 0.97166
+iter 1 cand 5 binding-only 0.96758 full 0.96849
+ITER 1 step 0.3 score 0.96770951 (0.9677095112451312, 'skewed_compute', 'G0')
+iter 2 cand 6 binding-only 0.96758 full 0.96932
+ITER 2 step 0.15 score 0.96770951 (0.9677095112451312, 'skewed_compute', 'G0')
+ITER 3 step 0.075 score 0.96770951 (0.9677095112451312, 'skewed_compute', 'G0')
+BEST 0.96770951 102.02 95.28 {"G0": [3.194, 2.784], "H0": [19.41, 3.155], "G1": [33.477, 3.667], "H1": [32.989, 15.52], "G2": [31.64, 27.326], "H2": [18.747, 28.896], "G3": [5.775, 29.032], "H3": [4.831, 16.725]}

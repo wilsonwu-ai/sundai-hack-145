@@ -1,0 +1,42 @@
+[1/6 48s] loop2_r0_0.json score=0.98404322 gpu=103.32 hbm=96.25 
+[2/6 48s] loop2_r0_1.json score=0.98404322 gpu=103.32 hbm=96.15 
+[3/6 48s] loop2_r0_2.json score=0.98052519 gpu=103.04 hbm=95.76 
+[4/6 98s] loop2_r0_3.json score=0.98416887 gpu=103.33 hbm=96.51 
+[5/6 98s] loop2_r0_4.json score=0.98818947 gpu=103.65 hbm=95.12 
+[6/6 98s] loop2_r0_5.json score=0.98379193 gpu=103.3 hbm=95.84 
+ROUND {"round": 0, "n_train": 78, "train_mae": 0.0307, "predicted": [0.9541, 0.9544, 0.9545, 0.9545, 0.9563, 0.9566], "hotspot": [0.98404322, 0.98404322, 0.98052519, 0.98416887, 0.98818947, 0.98379193], "best_so_far": 0.97851489, "seconds": 148.1}
+[1/6 50s] loop2_r1_0.json score=0.97650459 gpu=102.72 hbm=94.54 
+[2/6 50s] loop2_r1_1.json score=0.974243 gpu=102.54 hbm=94.7 
+[3/6 50s] loop2_r1_2.json score=0.97688152 gpu=102.75 hbm=95.0 
+[4/6 99s] loop2_r1_3.json score=0.97612765 gpu=102.69 hbm=95.0 
+[5/6 99s] loop2_r1_4.json score=0.97399171 gpu=102.52 hbm=94.47 
+[6/6 99s] loop2_r1_5.json score=0.98894333 gpu=103.71 hbm=96.42 
+ROUND {"round": 1, "n_train": 84, "train_mae": 0.0312, "predicted": [0.9595, 0.9596, 0.96, 0.9602, 0.9603, 0.9606], "hotspot": [0.97650459, 0.974243, 0.97688152, 0.97612765, 0.97399171, 0.98894333], "best_so_far": 0.97399171, "seconds": 151.7}
+[1/6 82s] loop2_r2_0.json score=0.97952004 gpu=102.96 hbm=94.69 
+[2/6 82s] loop2_r2_1.json score=0.98014826 gpu=103.01 hbm=94.73 
+[3/6 82s] loop2_r2_2.json score=0.97650459 gpu=102.72 hbm=95.77 
+[4/6 186s] loop2_r2_3.json score=0.98014826 gpu=103.01 hbm=94.72 
+[5/6 186s] loop2_r2_4.json score=0.9793944 gpu=102.95 hbm=95.22 
+[6/6 186s] loop2_r2_5.json score=0.9793944 gpu=102.95 hbm=95.24 
+ROUND {"round": 2, "n_train": 90, "train_mae": 0.0314, "predicted": [0.9568, 0.9573, 0.958, 0.9581, 0.9582, 0.9594], "hotspot": [0.97952004, 0.98014826, 0.97650459, 0.98014826, 0.9793944, 0.9793944], "best_so_far": 0.97399171, "seconds": 237.6}
+[1/6 69s] loop2_r3_0.json score=0.9762533 gpu=102.7 hbm=94.6 
+[2/6 69s] loop2_r3_1.json score=0.98240985 gpu=103.19 hbm=95.19 
+[3/6 69s] loop2_r3_2.json score=0.98266114 gpu=103.21 hbm=95.18 
+[4/6 138s] loop2_r3_3.json score=0.97750974 gpu=102.8 hbm=94.6 
+[5/6 139s] loop2_r3_4.json score=0.97977133 gpu=102.98 hbm=95.62 
+[6/6 139s] loop2_r3_5.json score=0.97952004 gpu=102.96 hbm=95.62 
+ROUND {"round": 3, "n_train": 96, "train_mae": 0.0315, "predicted": [0.959, 0.9599, 0.96, 0.9601, 0.9602, 0.9602], "hotspot": [0.9762533, 0.98240985, 0.98266114, 0.97750974, 0.97977133, 0.97952004], "best_so_far": 0.97399171, "seconds": 229.2}
+[1/6 49s] loop2_r4_0.json score=0.98957155 gpu=103.76 hbm=96.46 
+[2/6 50s] loop2_r4_1.json score=0.9909191 gpu=103.77 hbm=97.02 
+[3/6 50s] loop2_r4_2.json score=0.97474557 gpu=102.58 hbm=95.27 
+[4/6 98s] loop2_r4_3.json score=0.99325812 gpu=103.54 hbm=97.19 
+[5/6 98s] loop2_r4_4.json score=0.97449428 gpu=102.56 hbm=95.67 
+[6/6 98s] loop2_r4_5.json score=0.98328936 gpu=103.26 hbm=96.4 
+ROUND {"round": 4, "n_train": 104, "train_mae": 0.0314, "predicted": [0.9621, 0.9621, 0.9629, 0.9633, 0.9635, 0.9635], "hotspot": [0.98957155, 0.9909191, 0.97474557, 0.99325812, 0.97449428, 0.98328936], "best_so_far": 0.97399171, "seconds": 155.0}
+[1/6 45s] loop2_r5_0.json score=0.97474557 gpu=102.58 hbm=95.21 
+[2/6 45s] loop2_r5_1.json score=0.97587637 gpu=102.67 hbm=95.11 
+[3/6 45s] loop2_r5_2.json score=0.98831511 gpu=103.66 hbm=95.27 
+[4/6 89s] loop2_r5_3.json score=0.97461993 gpu=102.57 hbm=95.11 
+[5/6 90s] loop2_r5_4.json score=0.97612765 gpu=102.69 hbm=95.13 
+[6/6 90s] loop2_r5_5.json score=0.97587637 gpu=102.67 hbm=94.68 
+ROUND {"round": 5, "n_train": 110, "train_mae": 0.0314, "predicted": [0.9628, 0.9629, 0.9631, 0.9632, 0.9633, 0.9635], "hotspot": [0.97474557, 0.97587637, 0.98831511, 0.97461993, 0.97612765, 0.97587637], "best_so_far": 0.97399171, "seconds": 150.1}

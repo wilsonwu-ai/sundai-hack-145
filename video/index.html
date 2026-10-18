@@ -1,0 +1,295 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Chiplet Chill</title>
+<style>
+html,body{margin:0;background:#0b0f17;overflow:hidden}
+#stage{position:relative;width:1920px;height:1080px;background:#0b0f17;font-family:Helvetica,Arial,sans-serif}
+svg{position:absolute;left:0;top:0}
+.cap{position:absolute;left:0;width:1920px;top:70px;text-align:center;font-size:104px;font-weight:700;color:#e6edf3;opacity:0;letter-spacing:-1px;white-space:nowrap}
+.cap b{color:#f59e0b}
+.glow{mix-blend-mode:screen}
+</style></head>
+<body><div id="stage">
+<svg id="art" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="Helvetica, Arial, sans-serif">
+<defs>
+ <radialGradient id="hot"><stop offset="0" stop-color="#ff7a1a" stop-opacity=".95"/><stop offset=".55" stop-color="#ff4d1a" stop-opacity=".45"/><stop offset="1" stop-color="#ff2a00" stop-opacity="0"/></radialGradient>
+ <radialGradient id="cool"><stop offset="0" stop-color="#60a5fa" stop-opacity=".9"/><stop offset=".55" stop-color="#3b82f6" stop-opacity=".4"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></radialGradient>
+ <radialGradient id="core"><stop offset="0" stop-color="#ffe3c2" stop-opacity="1"/><stop offset=".4" stop-color="#ff3b30" stop-opacity=".8"/><stop offset="1" stop-color="#ff0000" stop-opacity="0"/></radialGradient>
+ <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c084fc"/></marker>
+</defs>
+<rect width="1920" height="1080" fill="#0b0f17"/>
+
+<!-- BOARD -->
+<g id="boardG">
+ <g id="boardIn" opacity="0">
+  <rect id="interposer" x="544" y="330" width="832" height="672" rx="14" fill="#10301f" stroke="#34d399" stroke-width="3"/>
+  <g id="gridlines" stroke="#34d399" stroke-opacity=".14" stroke-width="1"></g>
+  <g id="glowHot"></g><g id="glowCool" opacity="0"></g><g id="coreG" opacity="0"><circle id="core" r="150" fill="url(#core)" class="glow"/></g>
+  <g id="links"></g>
+  <g id="dies"></g>
+  <polyline id="check" points="780,690 900,800 1150,540" fill="none" stroke="#34d399" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+ </g>
+ <g id="solo" opacity="0">
+  <circle id="soloGlow" cx="960" cy="666" r="260" fill="url(#hot)" class="glow"/>
+  <rect x="810" y="531" width="300" height="270" rx="10" fill="#f97316" stroke="#fdba74" stroke-width="3"/>
+ </g>
+</g>
+
+<!-- S3 string meter -->
+<g id="meter" opacity="0">
+ <rect x="110" y="600" width="340" height="52" rx="26" fill="#151c2b" stroke="#aab4c3" stroke-width="3"/>
+ <rect id="meterFill" x="116" y="606" width="40" height="40" rx="20" fill="#34d399"/>
+ <path d="M110,730 q40,-50 80,0 t80,0 t80,0 t80,0" fill="none" stroke="#60a5fa" stroke-width="5" opacity=".7"/>
+</g>
+<!-- S4 thermometer -->
+<g id="thermo" opacity="0">
+ <rect x="250" y="400" width="64" height="520" rx="32" fill="#151c2b" stroke="#aab4c3" stroke-width="3"/>
+ <rect id="thermoFill" x="260" y="900" width="44" height="10" rx="22" fill="#ff4d1a"/>
+ <circle cx="282" cy="950" r="52" fill="#ff4d1a" stroke="#aab4c3" stroke-width="3"/>
+</g>
+
+<!-- S5 judge -->
+<g id="s5" opacity="0">
+ <circle cx="1400" cy="640" r="170" fill="#151c2b" stroke="#f59e0b" stroke-width="6"/>
+ <g id="ticks" stroke="#aab4c3" stroke-width="5"></g>
+ <line id="hand" x1="1400" y1="640" x2="1400" y2="520" stroke="#f59e0b" stroke-width="10" stroke-linecap="round"/>
+ <circle cx="1400" cy="640" r="12" fill="#f59e0b"/>
+ <g id="turtleHolder"><g id="turtle" transform="translate(1400 400)">
+  <ellipse cx="0" cy="0" rx="85" ry="52" fill="#f59e0b"/><path d="M-50,-10 h100 M-25,-40 v70 M25,-40 v70" stroke="#7c4a03" stroke-width="5" fill="none"/>
+  <circle cx="102" cy="-8" r="26" fill="#fbbf24"/><circle cx="110" cy="-14" r="5" fill="#0b0f17"/>
+  <ellipse cx="-50" cy="48" rx="20" ry="14" fill="#fbbf24"/><ellipse cx="50" cy="48" rx="20" ry="14" fill="#fbbf24"/>
+  <path d="M-85,5 l-26,10 l26,6z" fill="#fbbf24"/>
+ </g></g>
+ <text x="1400" y="890" text-anchor="middle" font-size="56" font-weight="700" fill="#f59e0b">HotSpot judge</text>
+</g>
+
+<!-- S6 grid -->
+<g id="s6" opacity="0"><g id="minis"></g></g>
+<g id="bolt" opacity="0" transform="translate(960 975)">
+ <polygon points="-20,-46 28,-46 4,-6 34,-6 -22,50 -4,6 -32,6" fill="#34d399"/>
+ <text x="60" y="22" font-size="52" font-weight="700" fill="#34d399">Surrogate</text>
+</g>
+
+<!-- S7 funnel -->
+<g id="s7" opacity="0">
+ <polygon points="690,400 1030,400 930,770 790,770" fill="#c084fc" fill-opacity=".1" stroke="#c084fc" stroke-width="5" stroke-linejoin="round"/>
+ <g transform="translate(260 520)"><polygon points="-20,-46 28,-46 4,-6 34,-6 -22,50 -4,6 -32,6" fill="#34d399"/></g>
+ <g id="judge7" transform="translate(1560 650) scale(.85)"><use href="#turtle" x="-1400" y="-400"/></g>
+ <polyline id="check7" points="1500,660 1550,710 1640,590" fill="none" stroke="#34d399" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+ <path id="loop" d="M1560,780 C1460,980 420,980 270,590" fill="none" stroke="#c084fc" stroke-width="6" stroke-dasharray="1" stroke-dashoffset="1" pathLength="1" marker-end="url(#arr)"/>
+ <g id="spin" transform="translate(915 906)"><circle r="46" fill="#0b0f17"/><path d="M0,-30 A30,30 0 1 1 -28,10" fill="none" stroke="#c084fc" stroke-width="8" stroke-linecap="round"/><polygon points="-40,-6 -16,-2 -34,18" fill="#c084fc"/></g>
+</g>
+
+<!-- S8 score -->
+<g id="s8" opacity="0">
+ <text id="score" x="1380" y="640" text-anchor="middle" font-size="260" font-weight="800" fill="#60a5fa">1.00</text>
+ <rect x="1020" y="700" width="720" height="26" rx="13" fill="#151c2b" stroke="#aab4c3" stroke-width="2"/>
+ <rect id="scoreBar" x="1022" y="702" width="716" height="22" rx="11" fill="#60a5fa"/>
+ <line id="baseTick" x1="1380" y1="680" x2="1380" y2="746" stroke="#e6edf3" stroke-width="5"/>
+ <g transform="translate(1100 840)"><rect x="-26" y="-26" width="52" height="52" rx="6" fill="#3b82f6"/><text id="gpuT" x="50" y="18" font-size="56" font-weight="700" fill="#e6edf3">0</text></g>
+ <g transform="translate(1440 840)"><rect x="-24" y="-24" width="48" height="48" rx="6" fill="#2dd4bf"/><text id="hbmT" x="50" y="18" font-size="56" font-weight="700" fill="#e6edf3">0</text></g>
+</g>
+</svg>
+<div class="cap" id="c1">Chips get hot. <b>Heat is the limit.</b></div>
+<div class="cap" id="c2">Place 4 GPUs and 4 memory chips.</div>
+<div class="cap" id="c3">Wires must reach. Strings have a limit.</div>
+<div class="cap" id="c4">Close pans heat each other.</div>
+<div class="cap" id="c5">Slow exact checker: <b>24 seconds.</b></div>
+<div class="cap" id="c6">Fast guesser: <b>under 1 second.</b></div>
+<div class="cap" id="c7">Guess many. Check only the best few.</div>
+<div class="cap" id="c8"></div>
+</div>
+<script src="../node_modules/gsap/dist/gsap.min.js"></script>
+<script>
+const D = window.DATA || {"best_score":"TBD","best_gpu_c":"TBD","best_hbm_c":"TBD","baseline_score":1.0,"baseline_gpu_c":104.59,"baseline_hbm_c":97.68,"hotspot_s":24,"surrogate_s":0.6};
+const num = v => (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && !isNaN(+v)));
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+// captions from data
+const sec = v => (+v === Math.round(+v)) ? String(Math.round(+v)) : String(+v);
+$('c5').innerHTML = `Slow exact checker: <b>${sec(D.hotspot_s)} seconds.</b>`;
+$('c6').innerHTML = `Fast guesser: <b>under ${sec(Math.ceil(+D.surrogate_s) || 1)} second${Math.ceil(+D.surrogate_s)>1?'s':''}.</b>`;
+const scoreTxt = num(D.best_score) ? (+D.best_score).toFixed(3) : String(D.best_score);
+$('c8').innerHTML = `Score <b>${scoreTxt}</b>. Below 1 beats baseline.`;
+
+// board geometry (16 px per mm)
+const S = 16, BX = 544, BY = 330;
+for (let i = 1; i < 13; i++) mk('line', {x1: BX + i*64, y1: BY, x2: BX + i*64, y2: BY + 672}, $('gridlines'));
+for (let j = 1; j < 10; j++) mk('line', {x1: BX, y1: BY + j*64, x2: BX + 832, y2: BY + j*64}, $('gridlines'));
+const GW = 11.5*S, GH = 10.5*S, HW = 10.5*S, HH = 10.2*S;
+const L = {dx: 13, dy: 18, off: 11.6, stx: 0, sty: 0, red: 0};
+const H = {r: 85, hot: 0.0, core: 0};
+const gD = [], hD = [], gGl = [], hGl = [], gCl = [], hCl = [], links = [];
+for (let i = 0; i < 4; i++) {
+  gGl.push(mk('circle', {r: 90, fill: 'url(#hot)', class: 'glow'}, $('glowHot')));
+  gCl.push(mk('circle', {r: 90, fill: 'url(#cool)', class: 'glow'}, $('glowCool')));
+}
+for (let i = 0; i < 4; i++) {
+  hGl.push(mk('circle', {r: 60, fill: 'url(#hot)', class: 'glow'}, $('glowHot')));
+  hCl.push(mk('circle', {r: 60, fill: 'url(#cool)', class: 'glow'}, $('glowCool')));
+}
+for (let i = 0; i < 4; i++) links.push(mk('line', {stroke: '#60a5fa', 'stroke-width': 9, 'stroke-linecap': 'round', pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1}, $('links')));
+for (let i = 0; i < 4; i++) { const g = mk('g', {}, $('dies')); const r = mk('rect', {width: GW, height: GH, rx: 8, fill: '#f97316', stroke: '#fdba74', 'stroke-width': 3}, g); g.setAttribute('opacity', 0); gD.push({g, r}); }
+for (let i = 0; i < 4; i++) { const g = mk('g', {}, $('dies')); const r = mk('rect', {width: HW, height: HH, rx: 8, fill: '#14b8a6', stroke: '#5eead4', 'stroke-width': 3}, g); g.setAttribute('opacity', 0); hD.push({g, r}); }
+const mix = (a, b, t) => { const p = c => [1,3,5].map(i => parseInt(c.substr(i,2),16)); const A = p(a), B = p(b); return '#' + A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join(''); };
+
+function layout() {
+  const cx = 26, cy = 21;
+  for (let i = 0; i < 4; i++) {
+    const gx = cx + (i%2 ? 1 : -1) * L.dx/2, gy = cy + (i<2 ? -1 : 1) * L.dy/2;
+    let hx = gx + (i%2 ? 1 : -1) * L.off, hy = gy;
+    if (i === 0) { hx += L.stx; hy += L.sty; }
+    const GX = BX + gx*S, GY = BY + gy*S, HX = BX + hx*S, HY = BY + hy*S;
+    gD[i].r.setAttribute('x', GX - GW/2); gD[i].r.setAttribute('y', GY - GH/2);
+    hD[i].r.setAttribute('x', HX - HW/2); hD[i].r.setAttribute('y', HY - HH/2);
+    for (const c of [gGl[i], gCl[i]]) { c.setAttribute('cx', GX); c.setAttribute('cy', GY); c.setAttribute('r', H.r*1.15); }
+    for (const c of [hGl[i], hCl[i]]) { c.setAttribute('cx', HX); c.setAttribute('cy', HY); c.setAttribute('r', H.r*0.75); }
+    const ln = links[i]; ln.setAttribute('x1', GX); ln.setAttribute('y1', GY); ln.setAttribute('x2', HX); ln.setAttribute('y2', HY);
+    ln.setAttribute('stroke', i === 0 ? mix('#60a5fa', '#ef4444', L.red) : '#60a5fa');
+  }
+  $('coreG').firstElementChild.setAttribute('cx', BX + cx*S); $('coreG').firstElementChild.setAttribute('cy', BY + cy*S);
+  $('glowHot').setAttribute('opacity', H.hot);
+  $('meterFill').setAttribute('width', 40 + C.meter*290);
+  $('meterFill').setAttribute('fill', mix('#34d399', '#ef4444', C.meterRed));
+  $('thermoFill').setAttribute('y', 900 - C.temp*480); $('thermoFill').setAttribute('height', 10 + C.temp*480);
+  $('score').textContent = num(D.best_score) ? C.v.toFixed(3) : (C.showTBD ? 'TBD' : C.v.toFixed(3));
+}
+const C = {meter: 0, meterRed: 0, temp: 0.1, v: +D.baseline_score, showTBD: 0};
+
+// clock ticks
+for (let i = 0; i < 12; i++) { const a = i*30*Math.PI/180; mk('line', {x1: 1400 + Math.sin(a)*145, y1: 640 - Math.cos(a)*145, x2: 1400 + Math.sin(a)*160, y2: 640 - Math.cos(a)*160}, $('ticks')); }
+
+// minis (4 rows x 8 cols)
+const minis = [];
+const cols = 8, rows = 4, MW = 190, MH = 130;
+for (let i = 0; i < cols*rows; i++) {
+  const g = mk('g', {}, $('minis'));
+  mk('rect', {x: -MW/2, y: -MH/2, width: MW, height: MH, rx: 10, fill: '#10301f', stroke: '#60a5fa', 'stroke-width': 5}, g);
+  [[-48,-22],[-6,-22],[36,-22],[78,-22]].forEach(([x,y]) => {});
+  const pos = [[-52,-26],[4,-26],[-52,22],[4,22]];
+  pos.forEach(([x,y]) => mk('rect', {x: x-14, y: y-12, width: 36, height: 30, rx: 4, fill: '#f97316'}, g));
+  [[-76,0],[62,-24],[62,24]].forEach(([x,y]) => mk('rect', {x: x-9, y: y-11, width: 22, height: 22, rx: 3, fill: '#14b8a6'}, g));
+  const r = i % cols, c = Math.floor(i / cols);
+  const x = 960 + (r - 3.5)*222, y = 460 + (c - 1.5)*172;
+  gsap.set(g, {x, y, scale: 0, opacity: 0});
+  minis.push({g, rect: g.firstElementChild, x, y, i});
+}
+const FINAL = i => (i % 5 === 0 ? '#ef4444' : '#60a5fa');
+const PICK = [3, 14, 25];
+
+// ----- timeline -----
+const T = gsap.timeline({paused: true});
+const cap = (id, t0, t1) => {
+  T.fromTo('#' + id, {opacity: 0, y: 24}, {opacity: 1, y: 0, duration: .45, ease: 'power2.out', immediateRender: false}, t0);
+  T.to('#' + id, {opacity: 0, y: -14, duration: .35, ease: 'power1.in'}, t1 - .35);
+};
+const show = (sel, t0, t1) => { T.to(sel, {opacity: 1, duration: .4}, t0); if (t1) T.to(sel, {opacity: 0, duration: .35}, t1 - .35); };
+
+T.addLabel('s1', 0).addLabel('s2', 5).addLabel('s3', 10).addLabel('s4', 16).addLabel('s5', 22).addLabel('s6', 28).addLabel('s7', 34).addLabel('s8', 39);
+cap('c1', 0, 5); cap('c2', 5, 10); cap('c3', 10, 16); cap('c4', 16, 22); cap('c5', 22, 28); cap('c6', 28, 34); cap('c7', 34, 39); cap('c8', 39, 44);
+
+// S1
+T.fromTo('#boardIn', {opacity: 0, scale: .9, svgOrigin: '960 666'}, {opacity: 1, scale: 1, duration: 1.0, ease: 'power2.out', immediateRender: false}, .2);
+T.fromTo('#solo', {opacity: 0, scale: .6, svgOrigin: '960 666'}, {opacity: 1, scale: 1, duration: .9, ease: 'back.out(1.6)', immediateRender: false}, .9);
+T.fromTo('#soloGlow', {opacity: .35}, {opacity: 1, duration: .7, repeat: 5, yoyo: true, ease: 'sine.inOut', immediateRender: false}, 1.2);
+T.to('#solo', {opacity: 0, duration: .4}, 4.7);
+
+// S2
+const dropOrder = [...gD, ...hD];
+dropOrder.forEach((d, k) => {
+  T.fromTo(d.g, {y: -420, opacity: 0}, {y: 0, opacity: 1, duration: .6, ease: 'back.out(1.5)', immediateRender: false}, 5.3 + k*.4);
+});
+T.to(H, {hot: .55, duration: 1.2, ease: 'sine.inOut'}, 8.6);
+T.to('#interposer', {strokeWidth: 6, duration: .5, yoyo: true, repeat: 1}, 8.9);
+
+// S3
+links.forEach((ln, k) => T.to(ln, {strokeDashoffset: 0, duration: .8, ease: 'power2.inOut'}, 10.5 + k*.3));
+T.to('#meter', {opacity: 1, duration: .4}, 10.4);
+T.to(C, {meter: .55, duration: 1.6, ease: 'power1.inOut'}, 10.8);
+T.to(L, {stx: -2.4, sty: -4.6, red: 1, duration: 1.3, ease: 'power2.inOut'}, 12.8);
+T.to(C, {meter: 1, meterRed: 1, duration: 1.3, ease: 'power2.inOut'}, 12.8);
+T.to(L, {stx: 0, sty: 0, red: 0, duration: 1.0, ease: 'power2.inOut'}, 14.6);
+T.to(C, {meter: .55, meterRed: 0, duration: 1.0, ease: 'power2.inOut'}, 14.6);
+T.to('#meter', {opacity: 0, duration: .35}, 15.6);
+T.to(links, {opacity: 0, duration: .3}, 15.7);
+
+// S4
+T.to('#thermo', {opacity: 1, duration: .4}, 16.2);
+T.to(L, {dx: 11.6, dy: 10.7, off: 11.3, duration: 2.0, ease: 'power2.inOut'}, 16.5);
+T.to(H, {r: 135, hot: 1, core: 1, duration: 2.0, ease: 'power2.inOut'}, 16.5);
+T.to('#coreG', {opacity: 1, duration: 1.6}, 17.0);
+T.to(C, {temp: .95, duration: 2.0, ease: 'power2.inOut'}, 16.5);
+T.to(L, {dx: 13, dy: 18, off: 11.6, duration: 1.4, ease: 'power2.inOut'}, 20.2);
+T.to(H, {r: 85, hot: .35, duration: 1.4, ease: 'power2.inOut'}, 20.2);
+T.to('#coreG', {opacity: 0, duration: 1.0}, 20.2);
+T.to(C, {temp: .3, duration: 1.4, ease: 'power2.inOut'}, 20.2);
+T.to('#thermo', {opacity: 0, duration: .35}, 21.6);
+
+// S5: board shrinks left, slow judge
+T.to('#boardG', {scale: .6, x: -430, svgOrigin: '960 666', duration: 1.0, ease: 'power2.inOut'}, 22.2);
+T.to('#s5', {opacity: 1, duration: .5}, 22.6);
+T.fromTo('#turtle', {scale: .6, svgOrigin: '1400 400'}, {scale: 1, duration: .8, ease: 'back.out(2)', immediateRender: false}, 22.8);
+T.to('#hand', {rotation: 90, svgOrigin: '1400 640', duration: 3.4, ease: 'steps(3)'}, 23.4);
+T.to('#check', {strokeDashoffset: 0, duration: .7, ease: 'power2.out'}, 26.6);
+T.to('#s5', {opacity: 0, duration: .35}, 27.65);
+T.to('#boardG', {opacity: 0, duration: .35}, 27.65);
+
+// S6: surrogate grid
+T.to('#s6', {opacity: 1, duration: .1}, 28.1);
+T.to('#bolt', {opacity: 1, duration: .4}, 28.3);
+T.to(minis.map(m => m.g), {scale: 1, opacity: 1, duration: .35, ease: 'back.out(2)', stagger: {amount: 1.4, grid: [4, 8], from: 'start'}}, 28.4);
+minis.forEach(m => {
+  const t0 = 29.0 + (m.i % 8) * .09 + Math.floor(m.i/8) * .05;
+  T.to(m.rect, {stroke: '#ef4444', duration: .1, repeat: 5, yoyo: true}, t0);
+  T.to(m.rect, {stroke: FINAL(m.i), duration: .1}, t0 + .65);
+});
+T.to('#bolt', {opacity: 0, duration: .3}, 33.7);
+
+// S7: funnel
+T.to('#s7', {opacity: 1, duration: .4}, 34.2);
+T.to('#interposer', {opacity: 1, duration: .01}, 34.2);
+minis.forEach(m => {
+  if (PICK.includes(m.i)) return;
+  T.to(m.g, {x: 860, y: 430, scale: .25, opacity: 0, duration: 1.0, ease: 'power2.in'}, 34.5 + (m.i % 8)*.04 + Math.floor(m.i/8)*.08);
+});
+PICK.forEach((p, k) => {
+  const m = minis[p];
+  T.to(m.g, {x: 860, y: 430, scale: .35, duration: 1.0, ease: 'power2.in'}, 34.5);
+  T.to(m.g, {x: 840 + k*20, y: 740, scale: .3, duration: .8, ease: 'none'}, 35.6 + k*.05);
+  T.to(m.g, {x: 1560 - 130 + k*0, y: 560 + k*70, scale: .45, duration: 1.0, ease: 'power2.inOut'}, 36.5 + k*.1);
+  T.to(m.g, {opacity: 0, duration: .3}, 37.5 + k*.1);
+});
+T.to('#check7', {strokeDashoffset: 0, duration: .5}, 37.6);
+T.to('#loop', {strokeDashoffset: 0, duration: 1.0, ease: 'power1.inOut'}, 37.7);
+T.to('#spin', {rotation: 360, svgOrigin: '915 906', duration: 1.5, ease: 'none'}, 37.8);
+T.to('#s7', {opacity: 0, duration: .35}, 38.65);
+
+// S8: board back, cool, score
+T.set(minis.map(m => m.g), {opacity: 0}, 38.6);
+T.to('#s6', {opacity: 0, duration: .01}, 38.6);
+T.set('#check', {strokeDashoffset: 1}, 38.6);
+T.set('#boardG', {opacity: 0}, 38.6);
+T.to('#boardG', {opacity: 1, duration: .5}, 39.0);
+T.to('#glowCool', {opacity: 1, duration: 1.2}, 39.4);
+T.to('#glowHot', {opacity: 0, duration: 1.2}, 39.4);
+T.to(gD.map(d => d.r), {fill: '#3b82f6', stroke: '#93c5fd', duration: 1.2}, 39.4);
+T.to(hD.map(d => d.r), {fill: '#2dd4bf', stroke: '#99f6e4', duration: 1.2}, 39.4);
+T.to('#s8', {opacity: 1, duration: .5}, 39.4);
+if (num(D.best_score)) {
+  T.to(C, {v: +D.best_score, duration: 2.2, ease: 'power2.out'}, 40.0);
+  T.to('#scoreBar', {attr: {width: 716 * Math.min(+D.best_score, 1.2) / 1.2 * 1.0}, duration: 2.2, ease: 'power2.out'}, 40.0);
+} else {
+  T.set(C, {showTBD: 1}, 40.4);
+}
+T.fromTo('#score', {scale: .7, svgOrigin: '1380 560'}, {scale: 1, duration: 1.0, ease: 'elastic.out(1,.5)', immediateRender: false}, 40.2);
+// score bar baseline: 1.0 maps to the tick, bar starts at baseline
+(function(){ const w = 716/1.2*1.0; $('scoreBar').setAttribute('width', w); $('baseTick').setAttribute('x1', 1022 + w); $('baseTick').setAttribute('x2', 1022 + w); })();
+$('gpuT').textContent = num(D.best_gpu_c) ? (+D.best_gpu_c).toFixed(1) + '°C' : String(D.best_gpu_c);
+$('hbmT').textContent = num(D.best_hbm_c) ? (+D.best_hbm_c).toFixed(1) + '°C' : String(D.best_hbm_c);
+T.to({}, {duration: .01}, 44);
+
+window.DURATION = 44;
+window.seek = t => { T.seek(t, false); layout(); };
+window.seek(0);
+</script></body></html>

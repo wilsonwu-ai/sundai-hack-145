@@ -3,369 +3,339 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ChipletChill: how it works</title>
-<meta name="description" content="A 2035 GPU package that runs 14.9 °C cooler, found in your browser. How ChipletChill works.">
+<title>ChipletChill: beat the hotspot</title>
+<meta name="description" content="ChipletChill for Sundai Hack 145, Track 2. A fast surrogate searches chiplet layouts and a slow HotSpot judge checks the best ones.">
 <style>
 :root{
   --bg:#0a0a0c; --panel:#131318; --panel2:#1b1b22; --line:#2a2a34;
   --text:#ece9e4; --muted:#9a97a3; --accent:#fcb519; --hot:#f1731d; --hotter:#dd513a; --cool:#6a176e; --good:#8fd694;
-  --die:#2a2a34; --die-stroke:#d8d5df; --glow-a:#fcffa4; --glow-b:#f98e09; --glow-c:#bc3754;
-  --max:720px;
-}
-@media (prefers-color-scheme: light){
-  :root{
-    --bg:#f6f3ee; --panel:#ffffff; --panel2:#efebe4; --line:#d8d2c7;
-    --text:#1c1a20; --muted:#5f5b68; --accent:#b45309; --hot:#c2410c; --hotter:#9f1d1d; --cool:#6a176e; --good:#1f6b33;
-    --die:#e3ded5; --die-stroke:#3a3742; --glow-a:#f6b73c; --glow-b:#e0561b; --glow-c:#a3203f;
-  }
+  --max:960px; --read:720px;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
-main,header.top{max-width:var(--max);margin:0 auto;padding:0 16px}
-a{color:var(--accent)}
-.back{display:inline-block;margin:16px 0;font-weight:600;text-decoration:none;border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:var(--panel)}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 16px}
+.read{max-width:var(--read)}
+a{color:var(--accent);overflow-wrap:anywhere}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 h1{font-size:clamp(1.8rem,7vw,2.8rem);line-height:1.15;margin:8px 0 12px;letter-spacing:-.02em}
 h1 em{font-style:normal;color:var(--hot)}
 h2{font-size:1.4rem;margin:0 0 8px;letter-spacing:-.01em}
-h3{font-size:1.05rem;margin:18px 0 4px}
-section{margin:0 0 40px;padding-top:8px}
+h3{font-size:1.05rem;margin:20px 0 6px}
+section{margin:0 0 44px;padding-top:8px}
+p,li{overflow-wrap:anywhere}
 .kicker{color:var(--accent);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin:0 0 4px}
 .lead{font-size:1.1rem;color:var(--muted);margin:0 0 16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 20px}
+.btn{display:inline-block;font-weight:600;text-decoration:none;border:1px solid var(--line);padding:10px 16px;border-radius:999px;background:var(--panel);min-height:44px}
+.btn.primary{background:var(--accent);color:#111;border-color:var(--accent)}
+video{display:block;width:100%;max-width:960px;height:auto;background:#000;border-radius:14px;border:1px solid var(--line)}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.eli5{border-left:4px solid var(--accent)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin:12px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.card h3{margin:0 0 4px;color:var(--accent)}
+.card p{margin:6px 0;font-size:.95rem}
+.card .src{color:var(--muted);font-size:.8rem}
 .fig{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px;margin:12px 0}
-.fig svg{display:block;width:100%;height:auto}
-figcaption,.cap{color:var(--muted);font-size:.85rem;margin:6px 8px 4px}
-.beats{list-style:none;padding:0;margin:12px 0;display:grid;gap:10px}
-.beats li{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
-.beats .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--hot);color:#111;font-weight:800;display:grid;place-items:center;font-size:.9rem}
-button.replay{font:inherit;font-weight:600;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:10px 16px;min-height:44px;cursor:pointer;margin:4px 8px 8px}
-button.replay:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:520px}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
-.pick td{color:var(--good);font-weight:600}
-.star{display:grid;gap:10px}
-.star div{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--hot);border-radius:10px;padding:10px 14px}
-.star b{display:block;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.fig svg{display:block;max-width:100%;height:auto;width:100%}
+.cap{color:var(--muted);font-size:.85rem;margin:6px 8px 4px}
+ol.steps{padding-left:22px;margin:8px 0}
+ol.steps li{margin:6px 0}
 ul.tight{padding-left:20px;margin:8px 0}
 ul.tight li{margin:6px 0}
-.ph{font-family:ui-monospace,Menlo,monospace;font-size:.92em}
-footer{max-width:var(--max);margin:0 auto;padding:16px 16px 40px;color:var(--muted);font-size:.85rem}
-/* svg text */
-svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;fill:var(--text)}
-svg .mut{fill:var(--muted)}
-svg .box{fill:var(--panel2);stroke:var(--line);stroke-width:1.5}
-svg .slow{stroke:var(--hotter);stroke-width:2}
-svg .fast{stroke:var(--good);stroke-width:2}
-svg .arrow{stroke:var(--muted);stroke-width:1.8;fill:none}
-  .tablewrap{overflow-x:auto;margin:12px 0}
-  .tablewrap table{border-collapse:collapse;font-size:14px;min-width:560px}
-  .tablewrap th,.tablewrap td{padding:6px 8px;border-bottom:1px solid currentColor;border-bottom-color:color-mix(in srgb,currentColor 20%,transparent);text-align:left}
+.ladder{list-style:none;padding:0;margin:12px 0;display:grid;gap:8px}
+.ladder li{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.ladder b{color:var(--accent)}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+.big{font-size:1.15rem;font-weight:700;color:var(--good)}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:.92em}
+.star-tag{display:inline-block;background:var(--hot);color:#111;font-weight:800;border-radius:6px;padding:0 8px;margin-right:6px}
+footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
 </style>
 </head>
 <body>
-<header class="top">
-  <a class="back" href="./">&larr; Open the app</a>
-  <p class="kicker">ChipletChill &middot; Sundai Hack 145 &middot; Track 2</p>
-  <h1>A 2035 GPU package that runs <em>14.9 °C</em> cooler, found in your browser</h1>
-  <p class="lead">The hottest spot drops from 89.3 °C to 74.4 °C on the training workload, using 150 full solves. A solver-only search given 10&times; as many solves (1,500) does worse. The wire budget stays within 1.3&times; of the default layout.</p>
+
+<header class="wrap">
+  <p class="kicker" style="margin-top:20px">Sundai Hack 145 &middot; Track 2 &middot; STAR explainer</p>
+  <h1>ChipletChill: <em>beat the hotspot</em></h1>
+  <p class="lead">Score <b>{{BEST_SCORE}}</b> on the official AutoLab hill (baseline 1.0, lower is better).</p>
+  <div class="btns">
+    <a class="btn primary" href="./">Open the app</a>
+    <a class="btn" href="{{REPO_URL}}">Repo</a>
+  </div>
+  <video controls playsinline muted poster="./media/poster.png" preload="metadata"><source src="./media/chipletchill-720.mp4" type="video/mp4"></video>
 </header>
 
-<main>
+<main class="wrap" style="margin-top:32px">
 
-<section id="eli5">
+<section id="eli5" class="read">
   <p class="kicker">The simple version</p>
-  <h2>Four burners under one pan</h2>
-  <ol class="beats">
-    <li><span class="n">1</span><span>Picture one big frying pan sitting on four hot burners.</span></li>
-    <li><span class="n">2</span><span>The pan spreads the heat sideways, so each burner makes a warm glow around itself.</span></li>
-    <li><span class="n">3</span><span>Put the burners close together and the glows pile up. You get one scorching spot in the middle.</span></li>
-    <li><span class="n">4</span><span>Move the burners apart and the spot cools down, because each glow has room to fade.</span></li>
-    <li><span class="n">5</span><span>But each burner is tied to its neighbours with a short string (a wire). Strings only stretch so far, so you cannot shove burners to the corners. The game is to find the best spots the strings allow.</span></li>
+  <h2>ELI5</h2>
+  <div class="box eli5">
+    <p>Think of a big baking tray. You must place eight hot pans on it. Four are fat pans (the GPUs). Four are small pans (the memory, called HBM).</p>
+    <p>Each fat pan is tied to two small pans with short strings. The strings cannot be too long, and you get a fixed pile of string. The strings also get warm.</p>
+    <p>Pans that sit too close warm each other, like burners under one pan. Pans that sit too far apart break the strings. Your job is to keep the hottest pan as cool as you can.</p>
+    <p>You ask two helpers. One is a fast guesser. She answers in under a second but is a little off. The other is a slow exact checker. He takes about 24 seconds but is right. The guesser tries thousands of spots. The checker looks at only the best few.</p>
+  </div>
+</section>
+
+<section id="situation" class="read">
+  <p class="kicker"><span class="star-tag">S</span>Situation</p>
+  <h2>The hack and the two tracks</h2>
+  <p>Sundai Hack 145 ran at MIT. The opening talks set two tracks. Both are about the limits of AI compute: power, heat and memory.</p>
+  <p>The speakers said the AI data centers planned up to about 2030 are already signed. So new ideas matter after that, which is why the brief looks at 2035. A slide cites HPE and NVIDIA GTC 2025 for racks growing from 132 kW to 600 kW (deck slide 8).</p>
+  <h3>Track 1 vs Track 2</h3>
+  <ul class="tight">
+    <li><b>Track 1:</b> build the AI data center of 2035. You may put it anywhere, even under the ocean or on Mars. The work is estimating cost, energy and tokens, then adding limits like memory and speed.</li>
+    <li><b>Track 2:</b> design the coolest chiplet layout. A chiplet package is a set of small chips on one silicon base, called an interposer. The talk used the AMD MI300A stack as the picture: base, interposer, GPU dies and HBM (stacked memory).</li>
+  </ul>
+  <p>We took Track 2.</p>
+  <h3>What the Track 2 speaker said</h3>
+  <ul class="tight">
+    <li>He is finishing a PhD on simulation methods for the semiconductor stack.</li>
+    <li>Pushing a GPU harder always costs temperature, so a cooler layout buys more performance (paraphrase). Memory can overheat too.</li>
+    <li>How you solve it is up to the team. The organizers run an agent loop in the background: propose a layout, simulate, read the temperature, repeat.</li>
+    <li>Teams can write their own simulator. He said building thermal simulators with Claude is easy (paraphrase, from a noisy transcript).</li>
+    <li>Teams can also train a small neural network as a surrogate, a fast stand-in for the slow simulator, so the search runs faster.</li>
+  </ul>
+  <p class="cap">Source: research/lecture.md. Speech-to-text was noisy, so the wording is a paraphrase, not a quote.</p>
+</section>
+
+<section id="task" class="read">
+  <p class="kicker"><span class="star-tag">T</span>Task</p>
+  <h2>The official challenge, exactly</h2>
+  <p>The challenge is the AutoLab hill <span class="mono">beat-the-hotspot</span>. You submit one file, <span class="mono">submission.json</span>, with the eight die positions and optional wire routes. The judge checks the geometry and runs its own pinned HotSpot simulator. It never runs your code.</p>
+  <h3>What you place</h3>
+  <ul class="tight">
+    <li>An interposer of 52 x 42 mm.</li>
+    <li>4 GPU dies, each 11.5 x 10.5 mm.</li>
+    <li>4 HBM stacks, each 10.5 x 10.2 mm.</li>
+    <li>8 links in total: each GPU is tied to two HBM stacks.</li>
+  </ul>
+  <h3>The rules</h3>
+  <ul class="tight">
+    <li><b>Spacing:</b> at least 1 mm between dies.</li>
+    <li><b>Reach:</b> the four primary links may span at most 5 mm (Manhattan distance, meaning left-right plus up-down). The four secondary links may span at most 6 mm.</li>
+    <li><b>Port capacity:</b> a link needs enough chip edge for its bandwidth. The slide example says a 600 Gb/s link needs at least 4 mm.</li>
+    <li><b>Wire budget:</b> total wire length times bandwidth must stay within 13,500 GB/s x mm.</li>
+    <li><b>Wire heat:</b> wires make heat. The spec prices it at 0.20 pJ per bit for the two endpoints plus 0.08 pJ per bit per mm.</li>
+    <li>An invalid layout is rejected and does not rank.</li>
+  </ul>
+  <h3>How it is scored</h3>
+  <ul class="tight">
+    <li>The judge runs <b>5 workloads</b>, some memory-heavy and some compute-heavy.</li>
+    <li>Score is the worse of two ratios: (hottest GPU minus ambient) over (reference GPU minus ambient), and the same for HBM. Ambient is 25 C.</li>
+    <li>The reference is a seeded random layout. The baseline scores <b>1.0</b>. Lower is better. Below 1 means both temperatures beat the reference.</li>
+    <li>Routine runs use a 64 x 64 mesh. The final check uses 128 x 128.</li>
+    <li>The stack is a 500 um interposer, a 150 um die plane and 20 um thermal paste under a fixed spreader and sink.</li>
+    <li><b>Cooler window:</b> a central 44 x 34 mm region touches the cooling better (0.25 m-K/W) than the edges (2.0 m-K/W). Where you put the hot dies matters.</li>
+  </ul>
+  <p class="cap">Sources: the hill README and config in .official/sim, deck slides 28 to 34, research/tools.md. The README says the temperatures are relative benchmark values, not calibrated chip temperatures.</p>
+</section>
+
+<section id="action">
+  <p class="kicker"><span class="star-tag">A</span>Action</p>
+  <h2>What we did</h2>
+
+  <h3>(a) The tools and why each one fits</h3>
+  <div class="grid">
+    <div class="card">
+      <h3>AutoLab</h3>
+      <p>A site (app.autolab.ai) where you log in with GitHub, pick a hill and get GPU and LLM credits for a coding agent. The Track 2 challenge is packaged as a hill, so this is where the official score lives.</p>
+      <p class="src">Deck slides 38 to 41; hill config.</p>
+    </div>
+    <div class="card">
+      <h3>The beat-the-hotspot hill</h3>
+      <p>Version 0.1.0. Three metrics, all to minimize: score, worst GPU C, worst HBM C. It fits because it gives one honest number and a fixed rulebook to climb against.</p>
+      <p class="src">.official/sim/hill.yaml and README.</p>
+    </div>
+    <div class="card">
+      <h3>Organizer repos</h3>
+      <p>chiplet-thermal-simulator holds the workload patterns and rules. chiplet-thermal-gui adds a viewer. Our judge and surrogate reuse the simulator's geometry and workload maps, so we play by the same rules. We did not use the GUI in code.</p>
+      <p class="src">Slide 37; NOTICE.md.</p>
+    </div>
+    <div class="card">
+      <h3>HotSpot</h3>
+      <p>An outside thermal simulator (uvahotspot/HotSpot). The judge runs a pinned build and takes the peak GPU and HBM temperatures from it. Only HotSpot output counts, so it is our ground truth. On a Mac we build it ourselves and check it against the reference file.</p>
+      <p class="src">README; scripts/official/local_judge.py.</p>
+    </div>
+    <div class="card">
+      <h3>Models named in the slides</h3>
+      <p>The deck names models only in the Track 1 slides: Kimi K3 (2.8T total, 104B active parameters), Qwen3.5-397B and Qwen3.5-122B, and gpt-oss-120b. None is used for Track 2 scoring. The README leaves the AI method open: agent, surrogate, Bayesian search or other.</p>
+      <p class="src">Slide 10; README. Slides also mention a Gemma 4 hill; its link to Track 2 is unclear.</p>
+    </div>
+    <div class="card">
+      <h3>Claude Code</h3>
+      <p>Slide 39 names Claude Code and Codex as agents that can optimize against a hill. The speaker also said Claude makes thermal simulators easy to build. That is why a fast home-made simulator was a fair plan.</p>
+      <p class="src">Slide 39; research/lecture.md.</p>
+    </div>
+  </div>
+
+  <h3>(b) The loop</h3>
+  <p>A cheap surrogate searches many layouts. The slow judge checks only the best. Every checked layout is fed back to retrain the surrogate.</p>
+  <figure class="fig" style="margin:12px 0">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 710" role="img" aria-labelledby="t d" font-family="Helvetica, Arial, sans-serif">
+      <title id="t">Surrogate-in-the-loop search for the AutoLab beat-the-hotspot challenge</title>
+      <desc id="d">Left to right flow. The AutoLab hill challenge feeds a legal layout generator, then a physics surrogate (about 0.6 seconds per layout), then simulated annealing (6 chains of 200 steps). Best candidates go to the HotSpot judge (ground truth, about 24 seconds), which feeds results back to the surrogate for a refit on every verified layout. Verified layouts become submission.json and go to the AutoLab scoreboard. The first group is cheap and fast; the HotSpot judge is slow and exact.</desc>
+      <defs>
+        <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e6edf3"/></marker>
+        <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c084fc"/></marker>
+      </defs>
+      <rect width="1200" height="710" fill="#0b0f17"/>
+      <text x="600" y="36" text-anchor="middle" font-size="26" font-weight="700" fill="#e6edf3">Cheap surrogate searches, slow judge verifies</text>
+
+      <rect x="300" y="62" width="890" height="228" rx="16" fill="#34d399" fill-opacity="0.07" stroke="#34d399" stroke-width="2" stroke-dasharray="8 6"/>
+      <text x="745" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="#34d399">CHEAP AND FAST: about 0.6 s per layout</text>
+      <rect x="300" y="410" width="290" height="270" rx="16" fill="#f59e0b" fill-opacity="0.07" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/>
+      <text x="445" y="662" text-anchor="middle" font-size="17" font-weight="700" fill="#f59e0b">SLOW AND EXACT: about 24 s</text>
+
+      <g fill="#151c2b" stroke="#60a5fa" stroke-width="2">
+        <rect x="10" y="105" width="250" height="165" rx="12"/>
+        <rect x="320" y="105" width="250" height="165" rx="12"/>
+        <rect x="630" y="105" width="250" height="165" rx="12"/>
+        <rect x="940" y="105" width="250" height="165" rx="12"/>
+      </g>
+      <g text-anchor="middle" font-size="22" font-weight="700" fill="#e6edf3" stroke="none">
+        <text x="135" y="137">AutoLab hill:</text><text x="135" y="162">beat-the-hotspot</text>
+        <text x="445" y="137">Legal layout</text><text x="445" y="162">generator</text>
+        <text x="755" y="139">Physics surrogate</text>
+        <text x="1065" y="139">Simulated annealing</text>
+      </g>
+      <g text-anchor="middle" font-size="16" fill="#aab4c3">
+        <text x="135" y="196">Challenge spec,</text><text x="135" y="218">5 workloads</text>
+        <text x="445" y="196">Official rules: clearance,</text><text x="445" y="218">gaps, ports, routed wires,</text><text x="445" y="240">budget</text>
+        <text x="755" y="170">3-layer stack + spreader</text><text x="755" y="192">+ sink, ~0.6 s, plus learned</text><text x="755" y="214">correction per die type</text><text x="755" y="236">and workload</text>
+        <text x="1065" y="176">6 chains x 200 steps</text><text x="1065" y="198">on the surrogate</text>
+      </g>
+
+      <g fill="#151c2b" stroke="#60a5fa" stroke-width="2">
+        <rect x="320" y="455" width="250" height="165" rx="12" stroke="#f59e0b"/>
+        <rect x="630" y="455" width="250" height="165" rx="12"/>
+        <rect x="940" y="455" width="250" height="165" rx="12"/>
+      </g>
+      <g text-anchor="middle" font-size="22" font-weight="700" fill="#e6edf3">
+        <text x="445" y="489">HotSpot judge</text>
+        <text x="755" y="489">submission.json</text>
+        <text x="1065" y="489">AutoLab scoreboard</text>
+      </g>
+      <g text-anchor="middle" font-size="16" fill="#aab4c3">
+        <text x="445" y="522">Ground truth, ~24 s,</text><text x="445" y="544">organizer pipeline</text>
+        <text x="755" y="522">Die placements in mm</text>
+        <text x="1065" y="522">Peak-temperature score</text>
+      </g>
+
+      <g stroke="#e6edf3" stroke-width="2.5" fill="none" marker-end="url(#a)">
+        <path d="M260,187 H318"/>
+        <path d="M570,187 H628"/>
+        <path d="M880,187 H938"/>
+        <path d="M1065,270 V370 H480 V453"/>
+        <path d="M570,537 H628"/>
+        <path d="M880,537 H938"/>
+      </g>
+      <text x="1055" y="394" text-anchor="end" font-size="16" fill="#aab4c3">best 6 distinct candidates</text>
+
+      <path d="M360,455 V335 H700 V272" stroke="#c084fc" stroke-width="2.5" stroke-dasharray="7 5" fill="none" marker-end="url(#f)"/>
+      <text x="365" y="324" font-size="16" font-weight="700" fill="#c084fc">refit on every verified layout</text>
+
+      <g font-size="16" fill="#aab4c3">
+        <text x="630" y="655">Tradeoff: the surrogate screens up to 1,200</text>
+        <text x="630" y="677">layouts per round; HotSpot checks only the best.</text>
+      </g>
+    </svg>
+    <p class="cap">The same loop in words, for small screens:</p>
+    <ol class="steps" style="margin:0 8px 8px">
+      <li>The hill gives the rules and 5 workloads.</li>
+      <li>A generator makes only legal layouts.</li>
+      <li>The surrogate scores each one in about 0.6 s.</li>
+      <li>Simulated annealing (random search that sometimes accepts a worse move to avoid getting stuck) runs 6 chains of 200 steps on the surrogate.</li>
+      <li>The best 6 distinct layouts go to the HotSpot judge, about 24 s each.</li>
+      <li>The judge results retrain the surrogate. Repeat.</li>
+      <li>The best verified layout becomes submission.json.</li>
+    </ol>
+  </figure>
+
+  <h3>(c) Speed vs accuracy</h3>
+  <p>HotSpot takes about <b>24 s</b> per layout. Our surrogate takes about <b>0.6 s</b>. That is roughly 40 times faster (24 divided by 0.6). Both times are our own measurements (video/data.json).</p>
+  <p>So we climb a ladder. Each rung is slower and more trustworthy than the one before.</p>
+  <ol class="ladder">
+    <li><b>1. Surrogate screens.</b> Thousands of layouts, cheap.</li>
+    <li><b>2. HotSpot on the single binding workload.</b> The one workload that sets the score. About 5 times cheaper than the full judge.</li>
+    <li><b>3. Full 5-workload HotSpot judge.</b> Our local copy of the official pipeline.</li>
+    <li><b>4. AutoLab official score.</b> The number that counts.</li>
   </ol>
-  <p class="cap">The burners are chiplets (small chips that sit together in one package). The pan is the lid and silicon. The strings are the links between chips.</p>
-</section>
+  <p>The rank correlation between surrogate and judge was 0.90 on 63 judged layouts. That is good enough to pick what deserves a check, but not good enough to trust alone.</p>
 
-<section id="situation">
-  <p class="kicker">The situation</p>
-  <h2>What the hack asked</h2>
-  <p><b>Track 1</b> asked teams to design the most cost-effective factory that turns energy into AI tokens (the small pieces of text a model reads and writes). The site could be space, Mars, Antarctica, underground or Cambridge. The deliverable is a digital twin (a computer model of the whole plant) covering power, computing and cooling, tuned to use the least energy on a set of typical 2035 prompts.</p>
-  <p><b>Track 2</b> asked for the coolest chiplet layout. Teams train a surrogate model (a fast stand-in for a slow simulator), then use it in a loop to arrange chiplets so the maximum temperature is as low as possible under set workloads. We picked Track 2.</p>
-
-  <h3>Why chips run hot by 2035</h3>
-  <p>Power per package keeps climbing. These are the figures we found:</p>
+  <h3>(d) What failed and what we changed</h3>
   <ul class="tight">
-    <li>AMD MI300X: 750 W; MI355X: 1,400 W (<a href="https://en.wikipedia.org/wiki/AMD_Instinct">Wikipedia, AMD Instinct</a>).</li>
-    <li>NVIDIA DGX B200: about 14.3 kW for 8 GPUs (<a href="https://www.nvidia.com/en-us/data-center/dgx-b200/">NVIDIA</a>).</li>
-    <li>Reported roadmap TDPs (thermal design power, the heat a chip is built to shed), second-hand and unverified: Rubin 1,800 W, Rubin Ultra 3,600 W with 12 to 16 HBM stacks (<a href="https://www.3dtested.com/tech-industry/semiconductors/nvidia-enterprise-roadmap-rubin-rubin-ultra-feynman-and-silicon-photonics">3DTested</a>). HBM is high-bandwidth memory stacked next to the compute.</li>
-    <li>Rubin uses direct-to-chip liquid cooling (<a href="https://introl.com/blog/nvidia-rubin-full-production-ces-2026-ai-infrastructure">Introl, Jan 2026</a>).</li>
+    <li><b>v1: annealing found the surrogate's blind spots.</b> It chased layouts the surrogate loved and the judge did not. The surrogate predicted 0.952. HotSpot said 0.99 to 1.007, which is no better than baseline.</li>
+    <li><b>v2: a trust region and a local residual correction.</b> The trust region keeps the search close to layouts HotSpot has already checked. The residual correction fixes the surrogate's error near those layouts. Best score: 0.9740.</li>
+    <li><b>Polish.</b> The score is set by one die: G0 in the skewed_compute workload. We ran HotSpot on moves of that die directly. That took the score to <b>{{BEST_SCORE}}</b>.</li>
   </ul>
-  <p>Our test package is 4 compute dies at 300 W, 4 HBM stacks at 30 W and one IO die at 40 W: 1.36 kW on a 60 &times; 60 mm base, with a cold plate and 35 °C coolant. That is a 2035 projection, not a product spec.</p>
 </section>
 
-<section id="motion1">
-  <p class="kicker">Picture 1</p>
-  <h2>Heat piles up, then spreads out</h2>
-  <figure class="fig" style="margin:12px 0">
-    <svg id="g1" viewBox="0 0 360 220" role="img" aria-label="Four chip dies packed together make one hot spot. They slide apart, still joined by link lines, and the hot spot cools.">
-      <defs>
-        <radialGradient id="glow">
-          <stop offset="0" stop-color="var(--glow-a)" stop-opacity=".95"/>
-          <stop offset=".45" stop-color="var(--glow-b)" stop-opacity=".6"/>
-          <stop offset="1" stop-color="var(--glow-c)" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      <rect x="6" y="6" width="348" height="208" rx="8" fill="none" stroke="var(--line)"/>
-      <g id="glows">
-        <circle class="gl" r="62" fill="url(#glow)"/>
-        <circle class="gl" r="62" fill="url(#glow)"/>
-        <circle class="gl" r="62" fill="url(#glow)"/>
-        <circle class="gl" r="62" fill="url(#glow)"/>
-      </g>
-      <ellipse id="spot" cx="180" cy="100" rx="70" ry="70" fill="url(#glow)" opacity="0"/>
-      <g id="links" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="4 3">
-        <line class="lk"/><line class="lk"/><line class="lk"/><line class="lk"/>
-      </g>
-      <g id="dies" fill="var(--die)" stroke="var(--die-stroke)" stroke-width="1.5">
-        <rect class="die" width="40" height="40" rx="4"/>
-        <rect class="die" width="40" height="40" rx="4"/>
-        <rect class="die" width="40" height="40" rx="4"/>
-        <rect class="die" width="40" height="40" rx="4"/>
-      </g>
-      <text id="g1t" x="180" y="196" text-anchor="middle" font-size="15" font-weight="700">Packed: peak 89.3 °C</text>
-      <text x="180" y="210" text-anchor="middle" font-size="9" class="mut">schematic, not to scale; the real layout also moves HBM and IO within the wire budget</text>
-    </svg>
-    <button class="replay" type="button" id="r1">Replay</button>
-  </figure>
-  <p>Left alone, the four compute dies share one hotspot. Spread them as far as the links allow and each glow fades before it meets the next. The peak in the label is the default layout from our solver; the final label is the optimizer's result (74.4 °C).</p>
-</section>
-
-<section id="loop">
-  <p class="kicker">How the search works</p>
-  <h2>A slow judge and a fast guesser</h2>
-  <p>The full solver is the ground truth. It models the package as a 2D plate (finite volumes, a way of chopping the plate into small cells, solved with conjugate gradients, an iterative method). It takes about 3 ms per solve on a 48&times;48 grid, which is too slow to try thousands of layouts. So we train a surrogate that guesses the peak temperature in well under a millisecond. The search runs on the surrogate. The solver only checks the best few.</p>
-  <figure class="fig" style="margin:12px 0">
-    <svg viewBox="0 0 360 560" role="img" aria-label="Loop diagram. Full solver makes training samples. The surrogate learns from them. Simulated annealing searches thousands of layouts on the surrogate. The top candidates go back to the full solver for checking, and the results become new training samples.">
-      <defs>
-        <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker>
-      </defs>
-      <!-- boxes -->
-      <rect class="box slow" x="30" y="16" width="230" height="74" rx="10"/>
-      <text x="145" y="44" text-anchor="middle" font-size="15" font-weight="700">1. Full solver</text>
-      <text x="145" y="62" text-anchor="middle" font-size="11" class="mut">ground truth, checks every claim</text>
-      <text x="145" y="79" text-anchor="middle" font-size="12" font-weight="700" fill="var(--hotter)" style="fill:var(--hotter)">SLOW: about 3 ms per solve</text>
-
-      <rect class="box" x="30" y="122" width="230" height="64" rx="10"/>
-      <text x="145" y="150" text-anchor="middle" font-size="15" font-weight="700">2. Training samples</text>
-      <text x="145" y="168" text-anchor="middle" font-size="11" class="mut">layout in, peak temperature out</text>
-
-      <rect class="box fast" x="30" y="218" width="230" height="74" rx="10"/>
-      <text x="145" y="246" text-anchor="middle" font-size="15" font-weight="700">3. Surrogate</text>
-      <text x="145" y="264" text-anchor="middle" font-size="11" class="mut">fast guess (ridge regression)</text>
-      <text x="145" y="281" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--good)">FAST: target under 0.2 ms</text>
-
-      <rect class="box fast" x="30" y="324" width="230" height="74" rx="10"/>
-      <text x="145" y="352" text-anchor="middle" font-size="15" font-weight="700">4. Simulated annealing</text>
-      <text x="145" y="370" text-anchor="middle" font-size="11" class="mut">tries thousands of layouts on the surrogate</text>
-      <text x="145" y="387" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--good)">thousands of fast guesses</text>
-
-      <rect class="box" x="30" y="430" width="230" height="64" rx="10"/>
-      <text x="145" y="458" text-anchor="middle" font-size="15" font-weight="700">5. Top candidates</text>
-      <text x="145" y="476" text-anchor="middle" font-size="11" class="mut">the best few, wire budget respected</text>
-
-      <!-- down arrows -->
-      <path class="arrow" d="M145 90V120" marker-end="url(#ah)"/>
-      <path class="arrow" d="M145 186V216" marker-end="url(#ah)"/>
-      <path class="arrow" d="M145 292V322" marker-end="url(#ah)"/>
-      <path class="arrow" d="M145 398V428" marker-end="url(#ah)"/>
-      <!-- return loop: candidates back to solver -->
-      <path class="arrow" d="M260 462H320V53H264" marker-end="url(#ah)"/>
-      <text x="326" y="260" font-size="11" class="mut" text-anchor="middle" transform="rotate(90 326 260)">6. Solver verifies; results join training</text>
-      <text x="180" y="530" text-anchor="middle" font-size="11" class="mut">Repeat until the verified best stops improving.</text>
-    </svg>
-    <figcaption>Green outlines are the fast steps, red is the slow one. Millisecond figures: solver time from our build; surrogate figure is our target.</figcaption>
-  </figure>
-  <p>Why does the surrogate work with so little data? Heat adds up: double the power and the temperature rise doubles. So each chiplet is a "glow" that fades over about 6.7 mm, plus mirror images at the package edges (heat cannot leave through the sides). Temperature is roughly the sum of the glows. The model only learns the weights.</p>
-  <p>One rule keeps it honest. Total link length may not exceed 1.3&times; the default layout's. Without it, the best answer would be to fling the hot dies to the corners.</p>
-</section>
-
-<section id="motion2">
-  <p class="kicker">Picture 2</p>
-  <h2>Why the surrogate helps</h2>
-  <figure class="fig" style="margin:12px 0">
-    <svg id="g2" viewBox="0 0 360 230" role="img" aria-label="Illustrative line chart. Best verified peak temperature against number of full solves. The surrogate loop falls fast and flattens low. Solver-only falls slowly.">
-      <line x1="44" y1="190" x2="340" y2="190" stroke="var(--muted)"/>
-      <line x1="44" y1="20" x2="44" y2="190" stroke="var(--muted)"/>
-      <line x1="44" y1="40" x2="340" y2="40" stroke="var(--line)" stroke-dasharray="3 4"/>
-      <text x="40" y="44" text-anchor="end" font-size="9" class="mut">89.3</text>
-      <text x="40" y="188" text-anchor="end" font-size="9" class="mut">cooler</text>
-      <text x="192" y="214" text-anchor="middle" font-size="11" class="mut">full solver calls (more &rarr;)</text>
-      <text x="12" y="110" font-size="11" class="mut" transform="rotate(-90 12 110)" text-anchor="middle">best verified peak °C</text>
-      <path id="c-slow" d="M44 40 C100 46 140 60 190 78 S290 108 340 118" fill="none" stroke="var(--hotter)" stroke-width="2.5"/>
-      <path id="c-fast" d="M44 40 C60 70 80 128 120 150 S200 168 340 172" fill="none" stroke="var(--good)" stroke-width="2.5"/>
-      <text x="338" y="110" text-anchor="end" font-size="11" font-weight="700" style="fill:var(--hotter)">solver only</text>
-      <text x="338" y="164" text-anchor="end" font-size="11" font-weight="700" style="fill:var(--good)">surrogate loop</text>
-      <text x="48" y="14" font-size="10" font-weight="700" fill="var(--accent)" style="fill:var(--accent)">ILLUSTRATIVE, not measured data</text>
-    </svg>
-    <button class="replay" type="button" id="r2">Replay</button>
-  </figure>
-  <p>The shape above is a sketch. Here is what we measured (mean of 3 seeds for the loop; best seed shown in brackets; <code>scripts/benchmark.ts</code>, results in <code>state/results.json</code>):</p>
-  <div class="tablewrap"><table>
-    <thead><tr><th>Workload</th><th>Start</th><th>Surrogate loop, 150 solves</th><th>Solver only, 150 solves</th><th>Solver only, 1,500 solves</th><th>Surrogate error</th></tr></thead>
-    <tbody>
-      <tr><td>Training</td><td>89.3 °C</td><td><b>74.5 (74.4) °C</b></td><td>78.7 °C</td><td>74.8 °C</td><td>0.15 °C</td></tr>
-      <tr><td>Prefill</td><td>81.1 °C</td><td><b>68.6 (68.5) °C</b></td><td>72.2 °C</td><td>69.0 °C</td><td>0.13 °C</td></tr>
-      <tr><td>Decode</td><td>60.6 °C</td><td><b>54.0 (54.0) °C</b></td><td>55.9 °C</td><td>54.4 °C</td><td>0.17 °C</td></tr>
-    </tbody>
-  </table></div>
-  <p>Every number in the loop column is the full solver's verdict on the final layout, not the surrogate's guess. The surrogate's average miss on the layouts it proposed was under 0.2 °C.</p>
-</section>
-
-<section id="why">
-  <p class="kicker">Why we chose this</p>
-  <h2>Situation, task, action, result</h2>
-  <div class="star">
-    <div><b>Situation</b>Two tracks, one day, a static site as the way to ship. Sundai asks for building and shipping, and shortcuts that work.</div>
-    <div><b>Task</b>Pick the idea we can finish and prove by the end of the day.</div>
-    <div><b>Action</b>We chose Track 2. It has a ground-truth solver to check every claim, it gives one number for the project card (the peak temperature), and it runs fully client-side, so it ships as a static site. We built the solver, the surrogate and the search loop, then checked every reported layout with the full solver.</div>
-    <div><b>Result</b>Peak temperature from 89.3 °C to 74.4 °C (14.9 °C cooler), 150 full solves. Solver-only with the same 150 solves reached 76.5 °C; with 1,500 solves, 74.8 °C.</div>
-  </div>
-
-  <h3>The six ideas we weighed</h3>
+<section id="result" class="read">
+  <p class="kicker"><span class="star-tag">R</span>Result</p>
+  <h2>Scoreboard</h2>
+  <p class="big">Best score {{BEST_SCORE}}. Hottest GPU {{BEST_GPU_C}} C. Hottest HBM {{BEST_HBM_C}} C.</p>
   <div class="tablewrap">
-  <table>
-    <thead><tr><th>Idea</th><th>Track</th><th>Verdict</th></tr></thead>
-    <tbody>
-      <tr class="pick"><td>1. ChipletChill</td><td>2</td><td>Picked. Ground truth, one number, static site.</td></tr>
-      <tr><td>2. Joules-per-Token Atlas (a data center digital twin placed in Cambridge, Antarctica, underground, orbit or Mars)</td><td>1</td><td>Passed. Without an anchor dataset its numbers would be assumptions.</td></tr>
-      <tr><td>3. Hotspot Tetris (human vs the optimizer)</td><td>2</td><td>Folded in as the "Beat the AI" mode.</td></tr>
-      <tr><td>4. Workload heat maps (training vs prefill vs decode)</td><td>2</td><td>Folded in as a workload selector.</td></tr>
-      <tr><td>5. Co-design bridge (chip °C to cooling energy to joules per token)</td><td>1 + 2</td><td>Stretch goal.</td></tr>
-      <tr><td>6. Space radiator sizer</td><td>1</td><td>Passed. Too narrow.</td></tr>
-    </tbody>
-  </table>
+    <table>
+      <thead><tr><th>Run</th><th>Score</th><th>Hottest GPU C</th><th>Hottest HBM C</th></tr></thead>
+      <tbody>
+        {{SCOREBOARD_ROWS}}
+      </tbody>
+    </table>
   </div>
+  <p>Local HotSpot judge vs AutoLab official: {{LOCAL_VS_OFFICIAL}}</p>
+  <p class="cap">The seeded baseline is 104.59 C (GPU) and 97.68 C (HBM), score 1.0. Lower is better.</p>
+
+  <h3>What we built</h3>
+  <ul class="tight">
+    <li><b>The app.</b> Drag dies on the interposer. Legality updates live using the organizer's exact rules. A surrogate estimate and a heat map update as you move. Download a ready submission.json.</li>
+    <li><b>A TypeScript port</b> of the rules and the surrogate, verified on 43 fixtures (47 tests).</li>
+    <li><b>The Python surrogate, the loop and the polish step.</b></li>
+    <li><b>A local judge</b> that reproduces the baseline exactly: 104.59 C and 97.68 C, score 1.0.</li>
+  </ul>
 </section>
 
-<section id="limits">
+<section id="limits" class="read">
   <p class="kicker">Honest limits</p>
-  <h2>What this does not show</h2>
+  <h2>What to trust, and what not to</h2>
   <ul class="tight">
-    <li>It is a 2D plate, not a 3D stack. It captures sideways spreading and hotspot coupling, which is what layout changes.</li>
-    <li>HBM has its own temperature limit. We do not model it. The usual placement-paper threshold is about 85 °C, and per-stack HBM power is unsourced.</li>
-    <li>The split of watts between compute and memory for each workload is our assumption. The factors encode the direction only (decode is memory-bound), not measured watts.</li>
-    <li>The cold plate coefficient (20,000 W/m²K) and the lid and silicon conductivities are plausible textbook choices, not sourced figures.</li>
-    <li>All power numbers are 2035 projections. About 153 W/cm² per compute die is aggressive for today and plausible for 2035.</li>
+    <li>The surrogate is a low-fidelity model on a 1 mm grid, with an affine correction (a straight-line fix per die class and workload). The estimates the app shows are estimates.</li>
+    <li>Every ranking number comes from HotSpot, not from the surrogate.</li>
+    <li>Final check on the 128 x 128 mesh: {{FINAL_128}}</li>
+    <li>Temperatures are relative benchmark values from the organizer's setup, not calibrated chip temperatures.</li>
+    <li>Organizer code is not included in our MIT license. Files derived from it stay under the organizer's terms (see NOTICE).</li>
   </ul>
 </section>
 
-<section id="prior">
-  <p class="kicker">Prior art</p>
-  <h2>Others got here first</h2>
-  <ul class="tight">
-    <li><a href="https://arxiv.org/html/2504.03808v1">TACPAs (2025)</a>: a neural-network surrogate plus annealing. Reported multi-GPU 95.27 to 91.33 °C. It uses the same loop shape as ours.</li>
-    <li><a href="https://arxiv.org/html/2502.16633v1">DiffChip (2025)</a>: a differentiable solver. Reported 85.98 to 75.44 °C.</li>
-    <li><a href="https://arxiv.org/abs/2312.16895">RLPlanner (2023)</a>: reinforcement learning with a fast thermal model, 20.28% better objective than annealing with HotSpot (a standard thermal simulator).</li>
-    <li><a href="https://past.date-conference.com/proceedings-archive/2021/html/1516.html">TAP-2.5D (2021)</a>: first open-source 2.5D thermal placer, with HotSpot inside the loop.</li>
-    <li><a href="https://arxiv.org/abs/2302.12949v1">DeepOHeat (2023)</a>: operator learning for full-chip thermal fields, 1,000&times; to 300,000&times; faster than Cadence Celsius.</li>
-  </ul>
-  <p><b>How we differ:</b> the whole loop runs in a browser tab in seconds, and the wire length is a hard limit, not a weighted term. Their reported numbers come from their own setups and are not comparable to ours.</p>
-</section>
-
-<p><a class="back" href="./">&larr; Open the app</a></p>
 </main>
-<footer>Sources and the list of unsourced assumptions: research/brief.md.</footer>
+
+<footer class="wrap">
+  <p>MIT license for our code. Credits: the organizers, for the challenge and the repos <a href="https://github.com/Czaja107/chiplet-thermal-simulator">Czaja107/chiplet-thermal-simulator</a> and <a href="https://github.com/Czaja107/chiplet-thermal-gui">chiplet-thermal-gui</a>; <a href="https://github.com/uvahotspot/HotSpot">HotSpot</a>; and Sundai Club.</p>
+  <p><a href="./">Open the app</a> &middot; <a href="{{REPO_URL}}">Repo</a></p>
+</footer>
 
 <script src="./vendor/gsap.min.js"></script>
 <script>
 (function(){
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var hasG = typeof gsap !== 'undefined';
-
-  /* ---------- Graphic 1 ---------- */
-  var dies = [].slice.call(document.querySelectorAll('#dies .die'));
-  var glows = [].slice.call(document.querySelectorAll('#glows .gl'));
-  var lks = [].slice.call(document.querySelectorAll('#links .lk'));
-  var spot = document.getElementById('spot');
-  var label = document.getElementById('g1t');
-  // centres of the 4 dies: packed and spread (schematic)
-  var packed = [[162,82],[202,82],[162,122],[202,122]];
-  var spread = [[90,56],[270,56],[90,150],[270,150]];
-  var ring = [[0,1],[1,3],[3,2],[2,0]];
-  var st = {t:0}; // 0 packed, 1 spread
-  function lerp(a,b,t){return a+(b-a)*t}
-  function draw(){
-    dies.forEach(function(d,i){
-      var cx=lerp(packed[i][0],spread[i][0],st.t), cy=lerp(packed[i][1],spread[i][1],st.t);
-      d.setAttribute('x',cx-20); d.setAttribute('y',cy-20);
-      glows[i].setAttribute('cx',cx); glows[i].setAttribute('cy',cy);
+  if (typeof gsap === 'undefined') return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!('IntersectionObserver' in window)) return;
+  var els = [].slice.call(document.querySelectorAll('main section, .card, .ladder li'));
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (e.isIntersecting) {
+        gsap.fromTo(e.target, {opacity:0, y:16}, {opacity:1, y:0, duration:.5, ease:'power2.out', clearProps:'opacity,transform'});
+        io.unobserve(e.target);
+      }
     });
-    ring.forEach(function(p,i){
-      var a=[lerp(packed[p[0]][0],spread[p[0]][0],st.t),lerp(packed[p[0]][1],spread[p[0]][1],st.t)];
-      var b=[lerp(packed[p[1]][0],spread[p[1]][0],st.t),lerp(packed[p[1]][1],spread[p[1]][1],st.t)];
-      lks[i].setAttribute('x1',a[0]);lks[i].setAttribute('y1',a[1]);
-      lks[i].setAttribute('x2',b[0]);lks[i].setAttribute('y2',b[1]);
-    });
-  }
-  function setFinal1(){
-    st.t=1; draw();
-    glows.forEach(function(g){g.setAttribute('opacity',.55)});
-    spot.setAttribute('opacity',0);
-    label.textContent='Spread: peak 74.4 °C';
-  }
-  function setStart1(){
-    st.t=0; draw();
-    glows.forEach(function(g){g.setAttribute('opacity',.9)});
-    spot.setAttribute('opacity',0);
-    label.textContent='Packed: peak 89.3 °C';
-  }
-  var tl1=null;
-  function play1(){
-    if(reduce||!hasG){setFinal1();return}
-    if(tl1)tl1.kill();
-    setStart1();
-    var g={o:0};
-    tl1=gsap.timeline();
-    tl1.to(g,{o:1,duration:1.4,ease:'power1.inOut',onUpdate:function(){spot.setAttribute('opacity',g.o)}})
-       .to({}, {duration:.6})
-       .add(function(){label.textContent='Sliding apart, still tied by links...'})
-       .to(st,{t:1,duration:2.2,ease:'power2.inOut',onUpdate:draw},'<')
-       .to(g,{o:0,duration:1.6,ease:'power1.out',onUpdate:function(){spot.setAttribute('opacity',g.o)}},'-=1.6')
-       .add(function(){label.textContent='Spread: peak 74.4 °C'});
-  }
-
-  /* ---------- Graphic 2 ---------- */
-  var slow=document.getElementById('c-slow'), fast=document.getElementById('c-fast');
-  var tl2=null;
-  function len(p){return p.getTotalLength()}
-  function setFinal2(){[slow,fast].forEach(function(p){p.style.strokeDasharray='none';p.style.strokeDashoffset=0})}
-  function play2(){
-    if(reduce||!hasG){setFinal2();return}
-    if(tl2)tl2.kill();
-    [slow,fast].forEach(function(p){var L=len(p);p.style.strokeDasharray=L;p.style.strokeDashoffset=L});
-    tl2=gsap.timeline();
-    tl2.to(slow,{strokeDashoffset:0,duration:3.4,ease:'none'},0)
-       .to(fast,{strokeDashoffset:0,duration:1.8,ease:'power2.out'},0);
-  }
-
-  /* start state + visibility triggers */
-  if(reduce||!hasG){setFinal1();setFinal2()}else{setStart1();}
-  function onView(el,fn){
-    if(reduce||!('IntersectionObserver' in window)){return}
-    var done=false;
-    var io=new IntersectionObserver(function(es){
-      es.forEach(function(e){if(e.isIntersecting&&!done){done=true;fn();io.disconnect()}});
-    },{threshold:.5});
-    io.observe(el);
-  }
-  onView(document.getElementById('g1'),play1);
-  onView(document.getElementById('g2'),play2);
-  document.getElementById('r1').addEventListener('click',play1);
-  document.getElementById('r2').addEventListener('click',play2);
-  // without IntersectionObserver, show final states
-  if(!reduce && !('IntersectionObserver' in window)){setFinal1();setFinal2()}
+  }, {threshold:.08});
+  els.forEach(function(el){ io.observe(el); });
 })();
 </script>
 </body>
