@@ -1,5 +1,26 @@
 [
  {
+  "name": "ChipletChill, HotSpot polish",
+  "score": 0.96771,
+  "worst_gpu_c": 102.02,
+  "worst_hbm_c": 95.28,
+  "source": "local HotSpot judge, organizer pipeline"
+ },
+ {
+  "name": "ChipletChill, surrogate loop v2",
+  "score": 0.97399,
+  "worst_gpu_c": 102.52,
+  "worst_hbm_c": 94.47,
+  "source": "local HotSpot judge"
+ },
+ {
+  "name": "Best of 66 random legal layouts",
+  "score": 0.97851,
+  "worst_gpu_c": 102.88,
+  "worst_hbm_c": 95.81,
+  "source": "local HotSpot judge"
+ },
+ {
   "name": "Seeded random baseline",
   "score": 1.0,
   "worst_gpu_c": 104.59,

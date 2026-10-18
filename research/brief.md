@@ -1,3 +1,5 @@
+> **Superseded.** This brief was written for an early self-made version of the challenge, before we switched to the organizer's official spec. Its package numbers do not apply to the final project. See [tools.md](tools.md) and the README.
+
 # Research brief: ChipletChill presets and prior art
 
 Compiled 18 Oct 2026 at Sundai Hack 145 by a read-only research agent, edited by hand.

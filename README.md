@@ -1,91 +1,81 @@
-# ChipletChill
+# ChipletChill: beat the hotspot
 
-**A 2035 GPU package that runs 14.9 °C cooler (best of 3 seeds; mean 14.8 °C), found by a surrogate model in your browser.**
-On the training workload the hottest spot drops from **89.3 °C to 74.4 °C** using 150 full thermal solves. A solver-only annealing search given **10× that budget** (1,500 solves, one run) lands slightly worse, at 74.8 °C.
+**Score 0.96771 on the organizer's HotSpot pipeline (64 x 64 mesh), below the seeded baseline (1.0) and below the 0.96846 that led the AutoLab leaderboard at noon.**
+Hottest GPU 102.02 C, hottest memory stack 95.28 C. Lower is better.
 
-**[Open the app](https://wilsonwu-ai.github.io/sundai-hack-145/)** · **[How it works, ELI5](https://wilsonwu-ai.github.io/sundai-hack-145/explainer.html)** · Built at [Sundai Hack 145](https://www.sundai.club), MIT CSAIL, 18 Oct 2026 · Track 2: *Design the coolest chiplet layout*
+**[Open the app](https://wilsonwu-ai.github.io/sundai-hack-145/)** · **[ELI5 explainer + video](https://wilsonwu-ai.github.io/sundai-hack-145/explainer.html)** · Built at [Sundai Hack 145](https://www.sundai.club), MIT CSAIL, 18 Oct 2026 · Track 2: *Design the coolest chiplet layout* · AutoLab hill [`czaja107/beat-the-hotspot`](https://app.autolab.ai/hills/czaja107/beat-the-hotspot)
 
-![Before and after: tightly packed layout at 89.3 °C vs the AI layout at 74.4 °C](docs/img/thumbnail.png)
+[![Explainer video poster](public/media/poster.png)](https://wilsonwu-ai.github.io/sundai-hack-145/explainer.html)
+
+## The challenge
+
+Place 4 GPU dies (11.5 x 10.5 mm) and 4 HBM stacks (10.5 x 10.2 mm) on a 52 x 42 mm silicon interposer. Eight mandatory links (4 primary at 600 GB/s, max 5 mm; 4 secondary at 300 GB/s, max 6 mm) must route on a 0.5 mm grid, with sum(bandwidth x length) at most 13,500 GB/s·mm. Five fixed workloads. The cooler only makes good contact in a 44 x 34 mm central window. Score = the worse of the GPU and HBM temperature rises, each divided by the seeded random baseline's rise. Full rules: the hill README.
 
 ## Results
 
-Each workload runs the same package (4 compute dies at 300 W, 4 HBM stacks at 30 W, 1 IO die at 40 W: 1.36 kW on a 60 × 60 mm interposer) under the same wire budget. Loop numbers are the mean of seeds 1 to 3, with the best seed in brackets. Every temperature is the **full solver's** verdict on the final layout, never the surrogate's guess.
+Every number below is a HotSpot result from the organizer's own pipeline (their verifier, their trace generator, their HotSpot inputs), never a surrogate estimate.
 
-| Workload | Start (packed) | Surrogate loop, 150 solves | Solver only, 150 solves | Solver only, 1,500 solves | Surrogate MAE |
-|---|---|---|---|---|---|
-| Training | 89.3 °C | **74.5 (74.4) °C** | 78.7 °C | 74.8 °C | 0.15 °C |
-| Inference prefill | 81.1 °C | **68.6 (68.5) °C** | 72.2 °C | 69.0 °C | 0.13 °C |
-| Inference decode | 60.6 °C | **54.0 (54.0) °C** | 55.9 °C | 54.4 °C | 0.17 °C |
+| Run | Score (64 x 64) | Hottest GPU C | Hottest HBM C |
+|---|---|---|---|
+| **ChipletChill, HotSpot polish** | **0.96771** | 102.02 | 95.28 |
+| czaja107, AutoLab #1 at noon | 0.96846 | 102.08 | 94.13 |
+| ChipletChill, surrogate loop v2 only | 0.97399 | 102.52 | 94.47 |
+| Best of 66 random legal layouts | 0.97851 | 102.88 | 95.81 |
+| Seeded random baseline | 1.0 | 104.59 | 97.68 |
 
-Reproduce: `npx vite-node scripts/benchmark.ts`. It writes [`state/results.json`](state/results.json). The loop takes about 1.8 s per run on an M-series laptop; the 1,500-solve solver-only run takes about 4.6 s.
+- **128 x 128 final mesh:** 0.9705 for the 0.96784 layout. The finer mesh takes back part of the margin, which is what the final pass is for.
+- **Local judge calibration:** our macOS build of the bundled HotSpot reproduces the baseline exactly (104.59 / 97.68 C, score 1.0), see `scripts/official/calibrate.sh` and `state/official/calibration.jsonl`.
+- **Official AutoLab run:** submitted to our climb; the leaderboard is the source of truth once it posts.
 
-## ELI5
-
-Four hot burners sit under one frying pan. The pan spreads the heat, so burners pushed close together make one scorching spot in the middle. Move them apart and each glow fades before it meets the next. But the burners are tied together with short strings (the wires between chips), so you can't just shove them into the corners. The game is to find where to put them so the hottest spot is as cool as it can be while the strings still reach. A computer that checks one arrangement exactly is slow, so we teach a quick guesser to rule out the bad ideas first, and only check the promising ones for real.
-
-## How it works
+## How it works: trading accuracy for speed
 
 ```mermaid
 flowchart LR
-  S["Full solver<br/>ground truth, ~3 ms"] -->|"labelled samples"| T["Training set"]
-  T --> M["Surrogate<br/>ridge on physics features<br/>~30 µs"]
-  M --> A["Simulated annealing<br/>40,000 guesses on the surrogate"]
-  A -->|"top 3 candidates"| V["Full solver verifies"]
-  V -->|"add to training, retrain"| T
-  V -->|"best verified layout"| R["Result"]
+  A["AutoLab hill<br/>beat-the-hotspot"] --> B["Legal layout generator<br/>official rules"]
+  B --> C["Physics surrogate<br/>~0.6 s, all 5 workloads"]
+  C --> D["Simulated annealing<br/>6 chains on the surrogate"]
+  D -->|"best 6 distinct"| E["HotSpot judge<br/>~24 s, ground truth"]
+  E -->|"refit on every verified layout"| C
+  E --> F["HotSpot polish<br/>binding workload only"]
+  F --> G["submission.json"] --> H["AutoLab scoreboard"]
 ```
 
-1. **Ground truth: a 2D heat-spreading solver** (`src/engine/solver.ts`). The package is a plate (die + copper lid lumped into k·t) cooled from above by a cold plate: `k·t ∇²T − h (T − T_amb) + q = 0` with insulated edges. Finite volumes on a 48 × 48 grid, solved by Jacobi-preconditioned conjugate gradients. Frozen tests check it against the closed-form uniform case, energy balance, mirror symmetry and linearity in power.
-2. **The insight: heat adds up linearly.** At steady state, temperature is the sum of each chiplet's own "glow", which fades over the spreading length `L = √(k·t / h) ≈ 6.7 mm`, plus mirror images at the insulated edges. The surrogate's 15 features (`src/engine/features.ts`) are those summed glows, computed with a K0 kernel at several points inside every chiplet. Ridge regression on top of them (λ chosen by exact leave-one-out) misses the full solver by 0.15 °C on average on the layouts the optimizer proposed (and within 2 °C on random held-out layouts, the test threshold).
-3. **The loop** (`src/engine/optimize.ts`). Spend 40% of the solver budget on diverse legal layouts, train, then repeat: anneal on the surrogate, verify the top candidates with the full solver, add them to the training set, retrain.
-4. **The constraint that keeps it honest** (`src/engine/constraints.ts`). Without it, the coolest layout is trivial: fling the hot dies into the corners. Every layout must keep its total die-to-die, die-to-HBM and die-to-IO link length within 1.3× the packed default, and no two chiplets may come within 1 mm.
+1. **Ground truth.** `scripts/official/local_judge.py` is a local twin of the organizer's judge. About 24 s per layout for 5 workloads.
+2. **Surrogate.** `scripts/official/lowfi.py` solves the same layer stack (interposer, die plane with gap material, TIM with the contact window, spreader, sink) on a 1 mm grid with the organizer's exact power maps and wire heat, about 0.6 s per layout. An affine correction per die class and workload is refit on every HotSpot result. Rank correlation with HotSpot: 0.90 on the first 63 judged layouts.
+3. **Search.** `scripts/official/loop2.py`: annealing on the surrogate inside a 1.5 mm trust region around verified layouts, plus a kernel-weighted residual from nearby HotSpot results. v1 without these exploited surrogate error (predicted 0.952, HotSpot said 0.99 to 1.007).
+4. **Polish.** `scripts/official/polish.py`: the score is set by one die (G0 in `skewed_compute`), so candidate moves are screened with a single HotSpot run on that workload (5x cheaper), and every improvement is confirmed by the full judge. 0.97399 to 0.96771.
 
-## In the app
+## The app
 
-- **Beat the AI:** drag the chiplets yourself. The heat map re-solves live, with the wire budget and legality shown as you move.
-- **Run AI optimizer:** watch the surrogate loop and a solver-only baseline race on the same budget, with the heat map following the best verified layout.
-- **Workloads:** training, inference prefill (compute-bound) and inference decode (memory-bound).
-- **Cooling:** a cold plate or in-chip microfluidics.
-
-## Why we built this
-
-We weighed six ideas across both tracks ([docs/ideas.md](docs/ideas.md)) and picked Track 2. It has a ground-truth solver, so every claim can be checked rather than argued. It reduces to one number. And it runs entirely client-side, so it ships as a static site. Full STAR write-up: [docs/why.md](docs/why.md).
-
-## Honest limits
-
-- A 2D plate, not a 3D stack: it captures lateral spreading and hotspot coupling (which is what layout changes), not vertical stacks or TSVs.
-- The HBM stacks' own, lower temperature limit is not modelled as a separate constraint.
-- The per-workload compute vs HBM power split is an assumption that only encodes the direction (decode is memory-bound). Sources and unsourced items are listed in [research/brief.md](research/brief.md).
-- 2035 power figures are projections from current roadmaps, not specs.
-
-## Prior art
-
-The loop follows the same shape as [TACPAs (2025)](https://arxiv.org/html/2504.03808v1): a surrogate predicts peak temperature and simulated annealing searches, with the solver verifying. Related work: [DiffChip](https://arxiv.org/html/2502.16633v1), [RLPlanner](https://arxiv.org/abs/2312.16895), [TAP-2.5D](https://past.date-conference.com/proceedings-archive/2021/html/1516.html), [DeepOHeat](https://arxiv.org/abs/2302.12949v1). What's different here: it runs in a browser tab in about two seconds, and the wire budget is a hard constraint rather than a weighted penalty.
+Drag dies on the interposer. Legality uses a TypeScript port of the organizer's rules (ports, A* router, budget), checked against their Python on 43 fixtures (20 legal, 23 illegal): same verdicts, same error text, identical routes. The live score and heat map come from a TypeScript port of the surrogate (labelled as an estimate). Load the best layout, download a valid `submission.json`, or upload your own.
 
 ## Run it
 
 ```bash
 npm install
-npm run dev          # app at http://localhost:5173/sundai-hack-145/
-npm test             # 18 unit tests: solver physics + optimizer guarantees
-npm run test:e2e     # Playwright, desktop + mobile
-npx vite-node scripts/benchmark.ts
+npm run dev            # app at http://localhost:5173/sundai-hack-145/
+npm test               # 54 unit tests (official rules + surrogate port)
+npm run test:e2e       # Playwright, desktop + mobile
+bash video/render.sh   # re-render the explainer video from video/data.json
 ```
 
-Vite + TypeScript, no runtime dependencies besides GSAP for the explainer animations. CI runs typecheck, unit and end-to-end tests on every push, and deploys to GitHub Pages only when they pass.
+The Python pipeline needs the organizer repo cloned into `.official/sim` (gitignored, not redistributed here):
 
-```
-src/contracts.ts        shared types
-src/engine/solver.ts    ground-truth thermal solver (frozen)
-src/engine/presets.ts   2035 package + workloads (frozen)
-src/engine/constraints  wire budget + legality (frozen)
-src/engine/features.ts  physics-informed surrogate features
-src/engine/surrogate.ts ridge regression, LOO-tuned
-src/engine/optimize.ts  surrogate loop + solver-only baseline
-src/ui/                 heat map, drag, chart, app
-public/explainer.html   ELI5, motion graphics, diagram
+```bash
+git clone https://github.com/Czaja107/chiplet-thermal-simulator .official/sim
+bash scripts/official/calibrate.sh                     # builds HotSpot, checks the baseline
+python3 scripts/official/train_and_search.py sample 60  # HotSpot training data
+python3 scripts/official/loop2.py --rounds 6
+python3 scripts/official/polish.py state/official/subs/<best>.json --dies G0,H0,H3,G3,G1
 ```
 
-## License
+## Honest limits
 
-[MIT](LICENSE)
+- The surrogate is a 1 mm low-fidelity model with a learned affine correction. Its numbers in the app are estimates; every ranking number above is HotSpot.
+- Our local HotSpot is built from the organizer's bundled source on macOS, not their pinned Linux binary. It matches the baseline to the published precision.
+- The 64-mesh margin over the leader is small (about 0.05 C); the 128 mesh score is 0.9705.
+- These are benchmark temperatures, not calibrated junction predictions (see the hill README).
+
+## Credits and license
+
+Challenge, simulator and data: [Czaja107/chiplet-thermal-simulator](https://github.com/Czaja107/chiplet-thermal-simulator) and [chiplet-thermal-gui](https://github.com/Czaja107/chiplet-thermal-gui). Thermal solver: [HotSpot](https://github.com/uvahotspot/HotSpot). Platform: [AutoLab](https://app.autolab.ai). Event: [Sundai Club](https://www.sundai.club). The files in `src/official/data/` come from the organizer's repo and are not covered by this repo's license (see `src/official/data/NOTICE.md`). Everything else: [MIT](LICENSE).

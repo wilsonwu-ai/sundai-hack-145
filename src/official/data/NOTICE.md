@@ -1,1 +1,3 @@
 The data files in this directory (spec.json and workloads.json) are derived from the organizer's repository, github.com/Czaja107/chiplet-thermal-simulator (challenge_spec.json and the output of generate_workloads.py). They are NOT covered by this repository's MIT license and remain subject to the organizer's own terms; they are included here only for interoperability with the official challenge rules. The TypeScript code in src/official is an independent reimplementation of the published rules.
+
+The same applies to `tests/fixtures/official/` and `tests/fixtures/lowfi/`, which contain outputs computed with the organizer's code and data so the TypeScript port can be checked against it.

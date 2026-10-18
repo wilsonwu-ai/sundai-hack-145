@@ -62,10 +62,10 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
 <header class="wrap">
   <p class="kicker" style="margin-top:20px">Sundai Hack 145 &middot; Track 2 &middot; STAR explainer</p>
   <h1>ChipletChill: <em>beat the hotspot</em></h1>
-  <p class="lead">Score <b>{{BEST_SCORE}}</b> on the official AutoLab hill (baseline 1.0, lower is better).</p>
+  <p class="lead">Score <b>0.96771</b> on the organizer&#39;s HotSpot pipeline, 64 x 64 mesh (baseline 1.0, lower is better). Submitted to the AutoLab hill.</p>
   <div class="btns">
     <a class="btn primary" href="./">Open the app</a>
-    <a class="btn" href="{{REPO_URL}}">Repo</a>
+    <a class="btn" href="https://github.com/wilsonwu-ai/sundai-hack-145">Repo</a>
   </div>
   <video controls playsinline muted poster="./media/poster.png" preload="metadata"><source src="./media/chipletchill-720.mp4" type="video/mp4"></video>
 </header>
@@ -273,23 +273,27 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
   <ul class="tight">
     <li><b>v1: annealing found the surrogate's blind spots.</b> It chased layouts the surrogate loved and the judge did not. The surrogate predicted 0.952. HotSpot said 0.99 to 1.007, which is no better than baseline.</li>
     <li><b>v2: a trust region and a local residual correction.</b> The trust region keeps the search close to layouts HotSpot has already checked. The residual correction fixes the surrogate's error near those layouts. Best score: 0.9740.</li>
-    <li><b>Polish.</b> The score is set by one die: G0 in the skewed_compute workload. We ran HotSpot on moves of that die directly. That took the score to <b>{{BEST_SCORE}}</b>.</li>
+    <li><b>Polish.</b> The score is set by one die: G0 in the skewed_compute workload. We ran HotSpot on moves of that die directly. That took the score to <b>0.96771</b>.</li>
   </ul>
 </section>
 
 <section id="result" class="read">
   <p class="kicker"><span class="star-tag">R</span>Result</p>
   <h2>Scoreboard</h2>
-  <p class="big">Best score {{BEST_SCORE}}. Hottest GPU {{BEST_GPU_C}} C. Hottest HBM {{BEST_HBM_C}} C.</p>
+  <p class="big">Best score 0.96771. Hottest GPU 102.02 C. Hottest HBM 95.28 C.</p>
   <div class="tablewrap">
     <table>
       <thead><tr><th>Run</th><th>Score</th><th>Hottest GPU C</th><th>Hottest HBM C</th></tr></thead>
       <tbody>
-        {{SCOREBOARD_ROWS}}
+        <tr><td>ChipletChill (ours), HotSpot polish</td><td><b>0.96771</b></td><td>102.02</td><td>95.28</td></tr>
+        <tr><td>czaja107 (AutoLab #1 at 12:00)</td><td>0.96846</td><td>102.08</td><td>94.13</td></tr>
+        <tr><td>Ours, surrogate loop v2 only</td><td>0.97399</td><td>102.52</td><td>94.47</td></tr>
+        <tr><td>Best of 66 random legal layouts</td><td>0.97851</td><td>102.88</td><td>95.81</td></tr>
+        <tr><td>Seeded random baseline</td><td>1.0</td><td>104.59</td><td>97.68</td></tr>
       </tbody>
     </table>
   </div>
-  <p>Local HotSpot judge vs AutoLab official: {{LOCAL_VS_OFFICIAL}}</p>
+  <p>Local HotSpot judge vs AutoLab official: our local judge reproduces the baseline exactly (104.59 / 97.68 C, score 1.0). AutoLab rows show the public leaderboard; our official run is queued at the time of writing.</p>
   <p class="cap">The seeded baseline is 104.59 C (GPU) and 97.68 C (HBM), score 1.0. Lower is better.</p>
 
   <h3>What we built</h3>
@@ -307,7 +311,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
   <ul class="tight">
     <li>The surrogate is a low-fidelity model on a 1 mm grid, with an affine correction (a straight-line fix per die class and workload). The estimates the app shows are estimates.</li>
     <li>Every ranking number comes from HotSpot, not from the surrogate.</li>
-    <li>Final check on the 128 x 128 mesh: {{FINAL_128}}</li>
+    <li>Final check on the 128 x 128 mesh: 0.9705 for the 0.96784 layout. The finer mesh takes back part of the margin, which is exactly what the final pass is for.</li>
     <li>Temperatures are relative benchmark values from the organizer's setup, not calibrated chip temperatures.</li>
     <li>Organizer code is not included in our MIT license. Files derived from it stay under the organizer's terms (see NOTICE).</li>
   </ul>
@@ -317,7 +321,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
 
 <footer class="wrap">
   <p>MIT license for our code. Credits: the organizers, for the challenge and the repos <a href="https://github.com/Czaja107/chiplet-thermal-simulator">Czaja107/chiplet-thermal-simulator</a> and <a href="https://github.com/Czaja107/chiplet-thermal-gui">chiplet-thermal-gui</a>; <a href="https://github.com/uvahotspot/HotSpot">HotSpot</a>; and Sundai Club.</p>
-  <p><a href="./">Open the app</a> &middot; <a href="{{REPO_URL}}">Repo</a></p>
+  <p><a href="./">Open the app</a> &middot; <a href="https://github.com/wilsonwu-ai/sundai-hack-145">Repo</a></p>
 </footer>
 
 <script src="./vendor/gsap.min.js"></script>

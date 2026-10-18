@@ -26,6 +26,15 @@ const PRESETS: { id: string; label: string; layout: Layout }[] = [
   { id: 'best', label: 'Best AI layout', layout: best },
 ]
 
+// Layouts HotSpot has judged through the organizer pipeline (64 x 64). The surrogate cannot rank
+// layouts this close, so when one of these is loaded the verified number is shown next to the estimate.
+const VERIFIED: { layout: Layout; score: number; gpu: number; hbm: number }[] = [
+  { layout: BASELINE, score: 1.0, gpu: 104.59, hbm: 97.68 },
+  { layout: best, score: 0.96771, gpu: 102.02, hbm: 95.28 },
+]
+const sameLayout = (a: Layout, b: Layout) =>
+  Object.keys(b).every((d) => a[d] && Math.abs(a[d][0] - b[d][0]) < 5e-4 && Math.abs(a[d][1] - b[d][1]) < 5e-4)
+
 const clone = (l: Layout): Layout => Object.fromEntries(Object.entries(l).map(([d, p]) => [d, [p[0], p[1]] as [number, number]]))
 const r3 = (x: number) => Math.round(x * 1000) / 1000
 
@@ -66,7 +75,8 @@ export function mountApp(root: HTMLElement): void {
         <div class="kpi"><small>Worst GPU C</small><b id="gpu" data-testid="gpu">-</b></div>
         <div class="kpi"><small>Worst HBM C</small><b id="hbm" data-testid="hbm">-</b></div>
       </div>
-      <p class="note">Score is the worse of GPU and HBM rise over ambient, relative to the baseline. Estimated from a fast model plus a fitted correction, not a HotSpot run.</p>
+      <p id="verified" data-testid="verified" class="badge ok" hidden></p>
+      <p class="note">Score is the worse of GPU and HBM rise over ambient, relative to the baseline. Estimated from a fast model plus a fitted correction, not a HotSpot run. The estimate finds the right neighbourhood but cannot rank layouts within about 0.03 of each other; that last step is done with HotSpot.</p>
       <div style="margin-top:10px">
         <div id="budget" data-testid="budget">-</div>
         <div class="bar" id="budgetbar"><i></i></div>
@@ -215,6 +225,10 @@ export function mountApp(root: HTMLElement): void {
     $('budgetbar').firstElementChild!.setAttribute('style', `width:${Math.min(100, (used / BUDGET) * 100)}%`)
     const fresh = lf && lfKey === key()
     stage.classList.toggle('stale', !fresh)
+    const v = VERIFIED.find((x) => sameLayout(layout, x.layout))
+    const vEl = $('verified')
+    vEl.hidden = !v
+    if (v) vEl.textContent = `HotSpot verified (organizer pipeline, 64 x 64): score ${fmt(v.score, 5)}, GPU ${fmt(v.gpu, 2)} C, HBM ${fmt(v.hbm, 2)} C`
     if (lf) {
       const p = predictScore(lf.per, coef)
       $('score').textContent = fmt(p.score, 3)

@@ -3,15 +3,15 @@
 **Title:** ChipletChill
 
 **Preview (one line, result first):**
-2035 GPU runs 14.9 °C cooler. Surrogate loop edged out a solver-only search with 10x the budget.
+Beat the hotspot at 0.96771: a physics surrogate finds the layout, HotSpot proves it.
 
 **Description:**
-A browser app that lays out a 1.36 kW 2035 GPU package (4 compute dies, 4 HBM stacks, 1 IO die) so its hottest spot is as cool as possible. A 2D heat solver is the ground truth. A physics-informed surrogate (heat adds up linearly, so it sums each die's "glow") predicts the peak in about 30 µs, and simulated annealing searches 40,000 layouts on it. The full solver re-checks the best few, they go back into training, and the loop repeats. A hard wire budget stops the hot dies being flung to the corners.
+Track 2 asks for the coolest placement of 4 GPU dies and 4 HBM stacks on a 52 x 42 mm interposer, under the organizer's link, routing and wire-budget rules, across 5 workloads. HotSpot takes about 24 s per layout, so we built a physics surrogate of the same stack (about 0.6 s) that learns its error from every HotSpot result. Annealing on the surrogate finds the basin; HotSpot polishes the one die that sets the score.
 
-Result: 89.3 → 74.4 °C in 150 full solves. Solver-only annealing with 1,500 solves (one run) reached 74.8 °C. Surrogate error: 0.15 °C. Try to beat the AI yourself.
+Result on the organizer's HotSpot pipeline (64 x 64): 0.96771 (GPU 102.02 C, HBM 95.28 C), below the baseline 1.0 and the noon AutoLab leader 0.96846. 128 x 128: 0.9705. Submitted to AutoLab.
 
-Limits: a 2D plate, HBM's own temperature limit not modelled, workload power split assumed, 2035 numbers are projections.
+The app lets you drag the dies with the official rules running live (checked against the organizer's Python on 43 layouts) and download a valid submission.json.
 
-**Links:** demo https://wilsonwu-ai.github.io/sundai-hack-145/ · repo https://github.com/wilsonwu-ai/sundai-hack-145 · ELI5 https://wilsonwu-ai.github.io/sundai-hack-145/explainer.html
+**Links:** demo https://wilsonwu-ai.github.io/sundai-hack-145/ · explainer + video https://wilsonwu-ai.github.io/sundai-hack-145/explainer.html · repo https://github.com/wilsonwu-ai/sundai-hack-145
 
-**Thumbnail:** `docs/img/thumbnail.png`, a before/after heat map on the same colour scale (89.3 °C packed vs 74.4 °C AI layout).
+**Thumbnail:** `public/media/poster.png`
