@@ -25,7 +25,7 @@ Track 2, as the slides and the official README state it:
 - Wire the chips together. Wires make heat too (slides 28 and 32). The spec prices it at 0.20 pJ per bit for the two endpoints plus 0.08 pJ per bit per mm of wire (slide 32; README).
 - Obey the rules:
   - Each GPU-HBM pair has a maximum Manhattan distance (slide 30). The README sets 5 mm for the four primary links and 6 mm for the four secondary links.
-  - Each link needs enough chip edge for its bandwidth. The slide's example: 600 Gb/s needs at least 4 mm of wire at a chip edge (slide 31).
+  - Each link needs enough chip edge for its bandwidth. The slide's example: 600 GB/s needs at least 4 mm of wire at a chip edge (slide 31 writes Gb/s; the official spec says GB/s).
   - Total wire length times bandwidth must stay under 13,500 mm x GB/s (slide 33).
 - Run 5 power workload patterns (slide 29). Make the hottest GPU and the hottest HBM as cool as possible across all five.
 - Score, from the README: the worse of the two normalized temperature rises, compared with a seeded random baseline. Baseline is 1.0. Lower is better. Below 1 means both beat the baseline. Every invalid layout is rejected.
@@ -37,16 +37,16 @@ Tools, in the order we used them. (Order is taken from our scripts in `scripts/o
 
 1. **Official simulator and rules** (the organizer's repo, slide 37, and `.official/sim`): the geometry checker and the HotSpot judge. This is the ground truth.
 2. **Local HotSpot judge** (`local_judge.py`): runs the real judge on our machine. Slow, about 24 s per layout (our measurement). Every judged layout is saved as a sample.
-3. **Physics surrogate** (`lowfi.py`): our own fast thermal model of the same stack. It uses the same layers (interposer, die, thermal paste, copper spreader and sink) on a coarse 1 mm grid. It reuses the official heat code, so only the solver is approximate. It takes about 0.6 s per layout for all five workloads (our measurement).
+3. **Physics surrogate** (`lowfi.py`): our own fast thermal model of the same stack. It uses the same layers (interposer, die, thermal paste, copper spreader and sink) on a coarse 1 mm grid. It reuses the official heat code, so only the solver is approximate. It takes about 0.12 s per layout for all five workloads (our measurement, state/official/timing_lowfi.json).
 4. **Correction fit** (`loop.py`): after each round, we fit a straight-line correction between surrogate and HotSpot for each chip class (GPU or HBM) and each workload.
-5. **Correlation check** (`corr.py`): rank correlation between surrogate and judge was 0.90 on 63 judged layouts (our measurement).
+5. **Correlation check** (`corr.py`): rank correlation between surrogate and judge was 0.90 (Spearman) on 63 judged layouts (state/official/corr_first63.txt).
 6. **Surrogate loop** (`loop.py`):
    - Run simulated annealing on the corrected surrogate. This is random search that sometimes accepts a worse move, to avoid getting stuck. Moves: nudge one or two dies, swap two dies of the same kind, or shift the whole layout.
    - Throw away illegal layouts.
    - Take the best distinct candidates and send only those to the HotSpot judge.
    - Add the true results to the samples, refit the correction, repeat. Script defaults are 4 rounds, 6 chains, 200 steps, 6 judged per round.
 
-**Speed versus accuracy.** The judge is exact but slow. The surrogate is about 40 times faster (24 s / 0.6 s, our arithmetic) but imperfect. So the surrogate does the wide search and the judge does the final say. The judge also corrects the surrogate every round. The score always comes from the judge, never from the surrogate.
+**Speed versus accuracy.** The judge is exact but slow. The surrogate is about 200 times faster (24 s / 0.12 s, both our measurements) but imperfect. So the surrogate does the wide search and the judge does the final say. The judge also corrects the surrogate every round. The score always comes from the judge, never from the surrogate.
 
 ### Result
 

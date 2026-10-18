@@ -120,7 +120,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
   <ul class="tight">
     <li><b>Spacing:</b> at least 1 mm between dies.</li>
     <li><b>Reach:</b> the four primary links may span at most 5 mm (Manhattan distance, meaning left-right plus up-down). The four secondary links may span at most 6 mm.</li>
-    <li><b>Port capacity:</b> a link needs enough chip edge for its bandwidth. The slide example says a 600 Gb/s link needs at least 4 mm.</li>
+    <li><b>Port capacity:</b> a link needs enough chip edge for its bandwidth. The slide example says a 600 GB/s link needs at least 4 mm (the slide writes Gb/s; the official spec uses GB/s).</li>
     <li><b>Wire budget:</b> total wire length times bandwidth must stay within 13,500 GB/s x mm.</li>
     <li><b>Wire heat:</b> wires make heat. The spec prices it at 0.20 pJ per bit for the two endpoints plus 0.08 pJ per bit per mm.</li>
     <li>An invalid layout is rejected and does not rank.</li>
@@ -180,7 +180,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
   <figure class="fig" style="margin:12px 0">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 710" role="img" aria-labelledby="t d" font-family="Helvetica, Arial, sans-serif">
       <title id="t">Surrogate-in-the-loop search for the AutoLab beat-the-hotspot challenge</title>
-      <desc id="d">Left to right flow. The AutoLab hill challenge feeds a legal layout generator, then a physics surrogate (about 0.6 seconds per layout), then simulated annealing (6 chains of 200 steps). Best candidates go to the HotSpot judge (ground truth, about 24 seconds), which feeds results back to the surrogate for a refit on every verified layout. Verified layouts become submission.json and go to the AutoLab scoreboard. The first group is cheap and fast; the HotSpot judge is slow and exact.</desc>
+      <desc id="d">Left to right flow. The AutoLab hill challenge feeds a legal layout generator, then a physics surrogate (about 0.12 seconds per layout), then simulated annealing (6 chains of 200 steps). Best candidates go to the HotSpot judge (ground truth, about 24 seconds), which feeds results back to the surrogate for a refit on every verified layout. Verified layouts become submission.json and go to the AutoLab scoreboard. The first group is cheap and fast; the HotSpot judge is slow and exact.</desc>
       <defs>
         <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e6edf3"/></marker>
         <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c084fc"/></marker>
@@ -189,7 +189,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
       <text x="600" y="36" text-anchor="middle" font-size="26" font-weight="700" fill="#e6edf3">Cheap surrogate searches, slow judge verifies</text>
 
       <rect x="300" y="62" width="890" height="228" rx="16" fill="#34d399" fill-opacity="0.07" stroke="#34d399" stroke-width="2" stroke-dasharray="8 6"/>
-      <text x="745" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="#34d399">CHEAP AND FAST: about 0.6 s per layout</text>
+      <text x="745" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="#34d399">CHEAP AND FAST: about 0.12 s per layout</text>
       <rect x="300" y="410" width="290" height="270" rx="16" fill="#f59e0b" fill-opacity="0.07" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/>
       <text x="445" y="662" text-anchor="middle" font-size="17" font-weight="700" fill="#f59e0b">SLOW AND EXACT: about 24 s</text>
 
@@ -208,7 +208,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
       <g text-anchor="middle" font-size="16" fill="#aab4c3">
         <text x="135" y="196">Challenge spec,</text><text x="135" y="218">5 workloads</text>
         <text x="445" y="196">Official rules: clearance,</text><text x="445" y="218">gaps, ports, routed wires,</text><text x="445" y="240">budget</text>
-        <text x="755" y="170">3-layer stack + spreader</text><text x="755" y="192">+ sink, ~0.6 s, plus learned</text><text x="755" y="214">correction per die type</text><text x="755" y="236">and workload</text>
+        <text x="755" y="170">3-layer stack + spreader</text><text x="755" y="192">+ sink, ~0.12 s, plus learned</text><text x="755" y="214">correction per die type</text><text x="755" y="236">and workload</text>
         <text x="1065" y="176">6 chains x 200 steps</text><text x="1065" y="198">on the surrogate</text>
       </g>
 
@@ -250,7 +250,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
     <ol class="steps" style="margin:0 8px 8px">
       <li>The hill gives the rules and 5 workloads.</li>
       <li>A generator makes only legal layouts.</li>
-      <li>The surrogate scores each one in about 0.6 s.</li>
+      <li>The surrogate scores each one in about 0.12 s.</li>
       <li>Simulated annealing (random search that sometimes accepts a worse move to avoid getting stuck) runs 6 chains of 200 steps on the surrogate.</li>
       <li>The best 6 distinct layouts go to the HotSpot judge, about 24 s each.</li>
       <li>The judge results retrain the surrogate. Repeat.</li>
@@ -259,7 +259,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
   </figure>
 
   <h3>(c) Speed vs accuracy</h3>
-  <p>HotSpot takes about <b>24 s</b> per layout. Our surrogate takes about <b>0.6 s</b>. That is roughly 40 times faster (24 divided by 0.6). Both times are our own measurements (video/data.json).</p>
+  <p>HotSpot takes about <b>24 s</b> per layout. Our surrogate takes about <b>0.12 s</b>. That is roughly 200 times faster (24 divided by 0.12). Both are our own measurements on one laptop (state/official/calibration.jsonl and state/official/timing_lowfi.json).</p>
   <p>So we climb a ladder. Each rung is slower and more trustworthy than the one before.</p>
   <ol class="ladder">
     <li><b>1. Surrogate screens.</b> Thousands of layouts, cheap.</li>
@@ -267,11 +267,11 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
     <li><b>3. Full 5-workload HotSpot judge.</b> Our local copy of the official pipeline.</li>
     <li><b>4. AutoLab official score.</b> The number that counts.</li>
   </ol>
-  <p>The rank correlation between surrogate and judge was 0.90 on 63 judged layouts. That is good enough to pick what deserves a check, but not good enough to trust alone.</p>
+  <p>The rank correlation between surrogate and judge was 0.90 (Spearman) on 63 judged layouts (state/official/corr_first63.txt). That is good enough to pick what deserves a check, but not good enough to trust alone.</p>
 
   <h3>(d) What failed and what we changed</h3>
   <ul class="tight">
-    <li><b>v1: annealing found the surrogate's blind spots.</b> It chased layouts the surrogate loved and the judge did not. The surrogate predicted 0.952. HotSpot said 0.99 to 1.007, which is no better than baseline.</li>
+    <li><b>v1: annealing found the surrogate's blind spots.</b> It chased layouts the surrogate loved and the judge did not. The surrogate predicted 0.952. HotSpot said 0.986 to 1.008, no better than the best random layout (0.9785).</li>
     <li><b>v2: a trust region and a local residual correction.</b> The trust region keeps the search close to layouts HotSpot has already checked. The residual correction fixes the surrogate's error near those layouts. Best score: 0.9740.</li>
     <li><b>Polish.</b> The score is set by one die: G0 in the skewed_compute workload. We ran HotSpot on moves of that die directly. That took the score to <b>0.96771</b>.</li>
   </ul>

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Surrogate-in-the-loop search for the official Track 2 challenge.
 
-Surrogate = low-fi physics model (lowfi.py, ~0.6 s per layout, all 5 workloads)
+Surrogate = low-fi physics model (lowfi.py, ~0.12 s per layout, all 5 workloads)
             + learned affine correction per (die class, workload), refit on every
             HotSpot result in state/official/samples.jsonl.
 Loop      = simulated annealing chains on the surrogate -> top distinct candidates

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 710" width="1200" height="710" role="img" aria-labelledby="t d" font-family="Helvetica, Arial, sans-serif">
   <title id="t">Surrogate-in-the-loop search for the AutoLab beat-the-hotspot challenge</title>
-  <desc id="d">Left to right flow. The AutoLab hill challenge feeds a legal layout generator, then a physics surrogate (about 0.6 seconds per layout), then simulated annealing (6 chains of 200 steps). Best candidates go to the HotSpot judge (ground truth, about 24 seconds), which feeds results back to the surrogate for a refit on every verified layout. Verified layouts become submission.json and go to the AutoLab scoreboard. The first group is cheap and fast; the HotSpot judge is slow and exact.</desc>
+  <desc id="d">Left to right flow. The AutoLab hill challenge feeds a legal layout generator, then a physics surrogate (about 0.12 seconds per layout), then simulated annealing (6 chains of 200 steps). Best candidates go to the HotSpot judge (ground truth, about 24 seconds), which feeds results back to the surrogate for a refit on every verified layout. Verified layouts become submission.json and go to the AutoLab scoreboard. The first group is cheap and fast; the HotSpot judge is slow and exact.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e6edf3"/></marker>
     <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c084fc"/></marker>
@@ -10,7 +10,7 @@
 
   <!-- speed bands -->
   <rect x="300" y="62" width="890" height="228" rx="16" fill="#34d399" fill-opacity="0.07" stroke="#34d399" stroke-width="2" stroke-dasharray="8 6"/>
-  <text x="745" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="#34d399">CHEAP AND FAST: about 0.6 s per layout</text>
+  <text x="745" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="#34d399">CHEAP AND FAST: about 0.12 s per layout</text>
   <rect x="300" y="410" width="290" height="270" rx="16" fill="#f59e0b" fill-opacity="0.07" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/>
   <text x="445" y="662" text-anchor="middle" font-size="17" font-weight="700" fill="#f59e0b">SLOW AND EXACT: about 24 s</text>
 
@@ -30,7 +30,7 @@
   <g text-anchor="middle" font-size="16" fill="#aab4c3">
     <text x="135" y="196">Challenge spec,</text><text x="135" y="218">5 workloads</text>
     <text x="445" y="196">Official rules: clearance,</text><text x="445" y="218">gaps, ports, routed wires,</text><text x="445" y="240">budget</text>
-    <text x="755" y="170">3-layer stack + spreader</text><text x="755" y="192">+ sink, ~0.6 s, plus learned</text><text x="755" y="214">correction per die type</text><text x="755" y="236">and workload</text>
+    <text x="755" y="170">3-layer stack + spreader</text><text x="755" y="192">+ sink, ~0.12 s, plus learned</text><text x="755" y="214">correction per die type</text><text x="755" y="236">and workload</text>
     <text x="1065" y="176">6 chains x 200 steps</text><text x="1065" y="198">on the surrogate</text>
   </g>
 

@@ -1,8 +1,8 @@
 graph LR
   A["AutoLab hill: beat-the-hotspot<br/>challenge spec, 5 workloads"]
-  subgraph FAST["CHEAP AND FAST: about 0.6 s per layout"]
+  subgraph FAST["CHEAP AND FAST: about 0.12 s per layout"]
     B["Legal layout generator<br/>official rules: clearance, gaps, ports, routed wires, budget"]
-    C["Physics surrogate<br/>3-layer stack + spreader + sink, ~0.6 s, plus learned correction per die type and workload"]
+    C["Physics surrogate<br/>3-layer stack + spreader + sink, ~0.12 s, plus learned correction per die type and workload"]
     D["Simulated annealing<br/>6 chains x 200 steps on the surrogate"]
   end
   subgraph SLOW["SLOW AND EXACT: about 24 s"]

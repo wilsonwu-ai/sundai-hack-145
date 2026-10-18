@@ -1,0 +1,4 @@
+n=63 layouts, 2520 die-peaks; fit hs = 1.186*lf + 8.45; r=0.9512 rmse=2.96C
+G fit 1.061*lf+17.51 rmse=2.89
+H fit 1.361*lf+-2.57 rmse=2.73
+score: spearman 0.899 mae 0.0272 best true 0.9785 true of best pred 0.9959

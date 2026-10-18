@@ -35,7 +35,7 @@ Every number below is a HotSpot result from the organizer's own pipeline (their 
 ```mermaid
 flowchart LR
   A["AutoLab hill<br/>beat-the-hotspot"] --> B["Legal layout generator<br/>official rules"]
-  B --> C["Physics surrogate<br/>~0.6 s, all 5 workloads"]
+  B --> C["Physics surrogate<br/>~0.12 s, all 5 workloads"]
   C --> D["Simulated annealing<br/>6 chains on the surrogate"]
   D -->|"best 6 distinct"| E["HotSpot judge<br/>~24 s, ground truth"]
   E -->|"refit on every verified layout"| C
@@ -44,9 +44,9 @@ flowchart LR
 ```
 
 1. **Ground truth.** `scripts/official/local_judge.py` is a local twin of the organizer's judge. About 24 s per layout for 5 workloads.
-2. **Surrogate.** `scripts/official/lowfi.py` solves the same layer stack (interposer, die plane with gap material, TIM with the contact window, spreader, sink) on a 1 mm grid with the organizer's exact power maps and wire heat, about 0.6 s per layout. An affine correction per die class and workload is refit on every HotSpot result. Rank correlation with HotSpot: 0.90 on the first 63 judged layouts.
-3. **Search.** `scripts/official/loop2.py`: annealing on the surrogate inside a 1.5 mm trust region around verified layouts, plus a kernel-weighted residual from nearby HotSpot results. v1 without these exploited surrogate error (predicted 0.952, HotSpot said 0.99 to 1.007).
-4. **Polish.** `scripts/official/polish.py`: the score is set by one die (G0 in `skewed_compute`), so candidate moves are screened with a single HotSpot run on that workload (5x cheaper), and every improvement is confirmed by the full judge. 0.97399 to 0.96771.
+2. **Surrogate.** `scripts/official/lowfi.py` solves the same layer stack (interposer, die plane with gap material, TIM with the contact window, spreader, sink) on a 1 mm grid with the organizer's exact power maps and wire heat, about 0.12 s per layout (measured, `state/official/timing_lowfi.json`). An affine correction per die class and workload is refit on every HotSpot result. Rank correlation with HotSpot: 0.90 (Spearman) on the first 63 judged layouts (`state/official/corr_first63.txt`).
+3. **Search.** `scripts/official/loop2.py`: annealing on the surrogate inside a 1.5 mm trust region around verified layouts, plus a kernel-weighted residual from nearby HotSpot results. v1 without these exploited surrogate error (predicted 0.952, HotSpot said 0.986 to 1.008, see `state/official/loop.jsonl`).
+4. **Polish.** `scripts/official/polish.py`: the score is set by one die (G0 in `skewed_compute`), so candidate moves are screened with a single HotSpot run on that workload (one HotSpot run instead of five), and every improvement is confirmed by the full judge. 0.97399 to 0.96771.
 
 ## The app
 
@@ -76,7 +76,7 @@ python3 scripts/official/polish.py state/official/subs/<best>.json --dies G0,H0,
 
 - The surrogate is a 1 mm low-fidelity model with a learned affine correction. Its numbers in the app are estimates; every ranking number above is HotSpot.
 - Our local HotSpot is built from the organizer's bundled source on macOS, not their pinned Linux binary. It matches the baseline to the published precision.
-- The 64-mesh margin over the leader is small (about 0.05 C); the 128 mesh score is 0.9705.
+- The lead is small: about 0.02 C on the hottest GPU over #2 (score gap 0.00025). The 128 mesh score is 0.9705.
 - These are benchmark temperatures, not calibrated junction predictions (see the hill README).
 
 ## Credits and license

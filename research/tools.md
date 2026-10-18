@@ -78,7 +78,7 @@ The deck names AI models only in the Track 1 data center slides (5 to 23), not i
 
 - What it is: `scripts/official/lowfi.py`, a simplified steady-state heat model of the same stack (interposer, die plane, TIM, copper spreader and sink, convection at 0.08 K/W total) on a uniform grid, solved with a conjugate gradient solver.
 - Why related: it takes the organizer's own heat source maps, so only the solver is approximate.
-- How we used it: default cell size 1.0 mm, all five workloads per layout. The loop docstring puts it near 0.6 s per layout.
+- How we used it: default cell size 1.0 mm, all five workloads per layout. Measured at about 0.12 s per layout (state/official/timing_lowfi.json).
 - Source: `scripts/official/lowfi.py`; `scripts/official/loop.py`.
 
 ### Learned correction
@@ -104,4 +104,4 @@ The deck names AI models only in the Track 1 data center slides (5 to 23), not i
 
 ## Speed vs accuracy
 
-HotSpot is the judge, so it is the only number that counts, but it is slow: about 24 s per layout for the 5 workloads (figure from the task brief; I did not find it in the files read). Our surrogate takes about 0.6 s per layout (loop.py docstring), roughly 40 times faster. The 128 grid takes "many minutes" (README). So the loop spends cheap evaluations: thousands of surrogate checks across annealing chains, then sends only a few distinct best-looking layouts to HotSpot. Those results feed back into the correction, so the cheap model gets closer to the judge each round. The surrogate only has to rank layouts well enough to pick which few deserve the expensive check.
+HotSpot is the judge, so it is the only number that counts, but it is slow: about 24 s per layout for the 5 workloads (state/official/calibration.jsonl, 23.82 s). Our surrogate takes about 0.12 s per layout (state/official/timing_lowfi.json), roughly 200 times faster. The 128 grid takes "many minutes" (README). So the loop spends cheap evaluations: thousands of surrogate checks across annealing chains, then sends only a few distinct best-looking layouts to HotSpot. Those results feed back into the correction, so the cheap model gets closer to the judge each round. The surrogate only has to rank layouts well enough to pick which few deserve the expensive check.
