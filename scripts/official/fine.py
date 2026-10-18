@@ -143,7 +143,7 @@ def search(a, start):
         if combos:
             base_n = len(cands)
             cands += combos
-            meta += [(f"combo{len(c)}", 0, 0) for c in combos]
+            meta += [(f"combo{k}", 0, 0) for k, c in zip((2, 3, 4, 6), combos)]
             extra = {w: run_many(pool, combos, w) for w in screen}
             for w in screen:
                 per_w[w] += extra[w]
@@ -153,7 +153,11 @@ def search(a, start):
                     scored.append((max(hp.norm(d, t) for r in rs for d, t in r.items()), base_n + j))
             scored.sort()
         accepted = False
-        top = [i for v, i in scored[: a.topk] if v < Fs - 1e-9]
+        improving = [i for v, i in scored if v < Fs - 1e-9]
+        singles = [i for i in improving if not meta[i][0].startswith("combo")]
+        top = improving[: a.topk]
+        if singles and singles[0] not in top:  # always double-check the best single move
+            top.append(singles[0])
         if top:
             rest = [w for w in hp.WORKLOADS if w not in screen]
             checks = {i: {w: per_w[w][i] for w in screen} for i in top}
@@ -163,6 +167,9 @@ def search(a, start):
                 checks[i][w] = r
             best_i = min(top, key=lambda i: fmax(checks[i]))
             Fn = fmax(checks[best_i])
+            for i in top:
+                (s, w, d, t) = hp.summary(checks[i])[0]
+                print(f"   check {meta[i][0]} {meta[i][1]},{meta[i][2]}: full {s:.7f} binds {w} {d} {t:.4f}", flush=True)
             if Fn < F - 1e-9:
                 cur, full, F, accepted = cands[best_i], checks[best_i], Fn, True
                 g, ux, uy = meta[best_i]

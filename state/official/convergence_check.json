@@ -1,0 +1,20 @@
+{
+ "current_best.json": {
+  "default_1e-6": {
+   "G0": 102.023998
+  },
+  "tight_1e-10": {
+   "G0": 102.021734
+  },
+  "solver_error_c": 0.002264
+ },
+ "cand_1.json": {
+  "default_1e-6": {
+   "G0": 101.960339
+  },
+  "tight_1e-10": {
+   "G0": 101.958075
+  },
+  "solver_error_c": 0.002264
+ }
+}

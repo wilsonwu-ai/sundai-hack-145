@@ -1,0 +1,7 @@
+{
+ "source": "autolab logs <experiment> (official: true, hotspot sha256 5c3fcad8ae63144b...), climb wilsonwu-ai/chipletchill-surrogate-loop-rented-cpu",
+ "runs": [
+  {"experiment": "6f155606", "score": 0.96770951, "gpu": 102.02, "hbm": 95.28, "submission": "state/official/subs/current_best.json"},
+  {"experiment": "4a47cafc", "score": 0.96695565, "gpu": 101.96, "hbm": 95.18, "submission": "state/official/subs/cand_1.json"}
+ ]
+}

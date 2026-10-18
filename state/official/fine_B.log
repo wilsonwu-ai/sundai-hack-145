@@ -1,0 +1,27 @@
+start F=0.9677597 G0=102.023998 screen=['memory_stream', 'skewed_compute']
+   check combo3 0,0: full 0.9674842 binds skewed_compute G0 102.0021
+   check G2 0,1: full 0.9676508 binds skewed_compute G0 102.0153
+   check H3 -1,1: full 0.9676621 binds skewed_compute G0 102.0162
+it 1 step 0.25 cands 30 acc True F 0.9674842 G0 102.002071 125.4s
+   check combo4 0,0: full 0.9669599 binds skewed_compute G0 101.9603
+   check combo3 0,0: full 0.9681070 binds memory_stream H2 95.3620
+   check combo2 0,0: full 0.9671034 binds skewed_compute G0 101.9718
+   check G3 1,0: full 0.9672647 binds skewed_compute G0 101.9846
+it 2 step 0.25 cands 37 acc True F 0.9669599 G0 101.960339 97.1s
+   check combo6 0,0: full 0.9947280 binds tensor_training G3 104.1704
+   check combo4 0,0: full 0.9948115 binds tensor_training G3 104.1771
+   check combo3 0,0: full 0.9944359 binds tensor_training G3 104.1472
+   check G1 1,0: full 0.9667473 binds skewed_compute G0 101.9434
+it 3 step 0.25 cands 45 acc True F 0.9667473 G0 101.943418 105.3s
+   check G1 2,0: full 0.9662997 binds skewed_compute G0 101.9078
+   check G1 1,0: full 0.9665366 binds skewed_compute G0 101.9266
+   check G3 0,1: full 0.9943968 binds tensor_training G3 104.1440
+it 4 step 0.25 cands 41 acc True F 0.9662997 G0 101.907797 70.7s
+   check combo2 0,0: full 0.9661365 binds skewed_compute G0 101.8948
+   check G2 0,1: full 0.9661989 binds skewed_compute G0 101.8998
+   check H2 1,0: full 0.9662374 binds skewed_compute G0 101.9028
+it 5 step 0.25 cands 24 acc True F 0.9661365 G0 101.894807 112.8s
+   check combo3 0,0: full 0.9658242 binds skewed_compute G0 101.8699
+   check G2 0,1: full 0.9659787 binds skewed_compute G0 101.8822
+   check H3 -1,1: full 0.9660458 binds skewed_compute G0 101.8876
+it 6 step 0.25 cands 31 acc True F 0.9658242 G0 101.869948 152.0s
