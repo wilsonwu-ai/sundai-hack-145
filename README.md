@@ -1,6 +1,6 @@
 # ChipletChill: beat the hotspot
 
-**#1 on the AutoLab `beat-the-hotspot` leaderboard: score 0.96770951** (seeded baseline 1.0, lower is better).
+**Score 0.96770951 on the AutoLab `beat-the-hotspot` leaderboard, #2 as of 18 Oct 13:45 ET** (seeded baseline 1.0, lower is better). frido22 leads at 0.96758387.
 Hottest GPU 102.02 C, hottest memory stack 95.28 C. Lower is better.
 
 **[Open the app](https://wilsonwu-ai.github.io/sundai-hack-145/)** · **[ELI5 explainer + video](https://wilsonwu-ai.github.io/sundai-hack-145/explainer.html)** · Built at [Sundai Hack 145](https://www.sundai.club), MIT CSAIL, 18 Oct 2026 · Track 2: *Design the coolest chiplet layout* · AutoLab hill [`czaja107/beat-the-hotspot`](https://app.autolab.ai/hills/czaja107/beat-the-hotspot)
@@ -17,9 +17,10 @@ Every number below is a HotSpot result from the organizer's own pipeline (their 
 
 | Run | Score (64 x 64) | Hottest GPU C | Hottest HBM C |
 |---|---|---|---|
-| **wilsonwu-ai (ours), AutoLab #1** | **0.96771** | 102.02 | 95.28 |
-| ottogin, AutoLab #2 | 0.96796 | 102.04 | 93.39 |
-| czaja107, AutoLab #3 | 0.96846 | 102.08 | 94.13 |
+| frido22, AutoLab #1 | 0.96758 | 102.01 | 93.26 |
+| **wilsonwu-ai (ours), AutoLab #2** | **0.96771** | 102.02 | 95.28 |
+| ottogin, AutoLab #3 | 0.96796 | 102.04 | 93.39 |
+| czaja107, AutoLab #4 | 0.96846 | 102.08 | 94.13 |
 | ChipletChill, surrogate loop v2 only | 0.97399 | 102.52 | 94.47 |
 | Best of 66 random legal layouts | 0.97851 | 102.88 | 95.81 |
 | Seeded random baseline | 1.0 | 104.59 | 97.68 |
@@ -76,7 +77,7 @@ python3 scripts/official/polish.py state/official/subs/<best>.json --dies G0,H0,
 
 - The surrogate is a 1 mm low-fidelity model with a learned affine correction. Its numbers in the app are estimates; every ranking number above is HotSpot.
 - Our local HotSpot is built from the organizer's bundled source on macOS, not their pinned Linux binary. It matches the baseline to the published precision.
-- The lead is small: about 0.02 C on the hottest GPU over #2 (score gap 0.00025). The 128 mesh score is 0.9705.
+- frido22 is ahead by one rounding step: 102.01 C against our 102.02 C on the hottest GPU. The judge rounds every die temperature to 0.01 C, so the top of the board moves in steps of 0.000126 and exact ties happen. The 128 mesh score is 0.9705.
 - These are benchmark temperatures, not calibrated junction predictions (see the hill README).
 
 ## Credits and license

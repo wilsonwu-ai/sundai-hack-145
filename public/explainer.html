@@ -62,7 +62,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
 <header class="wrap">
   <p class="kicker" style="margin-top:20px">Sundai Hack 145 &middot; Track 2 &middot; STAR explainer</p>
   <h1>ChipletChill: <em>beat the hotspot</em></h1>
-  <p class="lead"><b>#1 on the AutoLab beat-the-hotspot leaderboard</b> with score <b>0.96771</b> (baseline 1.0, lower is better).</p>
+  <p class="lead"><b>Score 0.96771 on the AutoLab beat-the-hotspot leaderboard</b>, #2 as of 18 Oct 13:45 ET (baseline 1.0, lower is better). frido22 leads at 0.96758.</p>
   <div class="btns">
     <a class="btn primary" href="./">Open the app</a>
     <a class="btn" href="https://github.com/wilsonwu-ai/sundai-hack-145">Repo</a>
@@ -280,14 +280,15 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
 <section id="result" class="read">
   <p class="kicker"><span class="star-tag">R</span>Result</p>
   <h2>Scoreboard</h2>
-  <p class="big">Best score 0.96771. Hottest GPU 102.02 C. Hottest HBM 95.28 C.</p>
+  <p class="big">Our best score 0.96771. Hottest GPU 102.02 C. Hottest HBM 95.28 C.</p>
   <div class="tablewrap">
     <table>
       <thead><tr><th>Run</th><th>Score</th><th>Hottest GPU C</th><th>Hottest HBM C</th></tr></thead>
       <tbody>
-        <tr><td>wilsonwu-ai (ours), AutoLab #1</td><td><b>0.96771</b></td><td>102.02</td><td>95.28</td></tr>
-        <tr><td>ottogin, AutoLab #2</td><td>0.96796</td><td>102.04</td><td>93.39</td></tr>
-        <tr><td>czaja107, AutoLab #3</td><td>0.96846</td><td>102.08</td><td>94.13</td></tr>
+        <tr><td>frido22, AutoLab #1</td><td>0.96758</td><td>102.01</td><td>93.26</td></tr>
+        <tr><td>wilsonwu-ai (ours), AutoLab #2</td><td><b>0.96771</b></td><td>102.02</td><td>95.28</td></tr>
+        <tr><td>ottogin, AutoLab #3</td><td>0.96796</td><td>102.04</td><td>93.39</td></tr>
+        <tr><td>czaja107, AutoLab #4</td><td>0.96846</td><td>102.08</td><td>94.13</td></tr>
         <tr><td>Ours, surrogate loop v2 only</td><td>0.97399</td><td>102.52</td><td>94.47</td></tr>
         <tr><td>Best of 66 random legal layouts</td><td>0.97851</td><td>102.88</td><td>95.81</td></tr>
         <tr><td>Seeded random baseline</td><td>1.0</td><td>104.59</td><td>97.68</td></tr>
@@ -295,7 +296,7 @@ footer{padding:16px 0 48px;color:var(--muted);font-size:.9rem}
     </table>
   </div>
   <p>Local HotSpot judge vs AutoLab official: identical. AutoLab scored our layout 0.96770951, the same value our local HotSpot twin computed, and the twin reproduces the baseline exactly (104.59 / 97.68 C, score 1.0).</p>
-  <p><img src="./media/leaderboard.png" alt="AutoLab leaderboard: wilsonwu-ai first at 0.96770951" style="max-width:100%;border-radius:8px"></p>
+  <p><img src="./media/leaderboard.png" alt="AutoLab leaderboard: frido22 first at 0.96758387, wilsonwu-ai second at 0.96770951" style="max-width:100%;border-radius:8px"></p>
   <p class="cap">The seeded baseline is 104.59 C (GPU) and 97.68 C (HBM), score 1.0. Lower is better.</p>
 
   <h3>What we built</h3>

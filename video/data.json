@@ -6,5 +6,5 @@
  "baseline_gpu_c": 104.59,
  "baseline_hbm_c": 97.68,
  "hotspot_s": 24,
- "surrogate_s": 0.6
+ "surrogate_s": 0.12
 }
