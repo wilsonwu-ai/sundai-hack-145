@@ -28,3 +28,8 @@ PASSED       score=0.963438 (min)  worst_gpu_c=101.68 (min)  worst_hbm_c=94.87 (
 config       thermal_grid=64x64*  hotspot_sha256=5c3fcad8ae63144b218d2fc1de28ea862f5c6d3751e7ab381d576e5c00cab4bb*   (* = primary)
 "official": true,
 "timestamp": "2026-10-18T18:24:11Z",
+== experiment 2a76bb6d
+PASSED       score=0.962809 (min)  worst_gpu_c=101.63 (min)  worst_hbm_c=94.84 (min)
+config       thermal_grid=64x64*  hotspot_sha256=5c3fcad8ae63144b218d2fc1de28ea862f5c6d3751e7ab381d576e5c00cab4bb*   (* = primary)
+"official": true,
+"timestamp": "2026-10-18T18:32:10Z",
