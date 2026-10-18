@@ -1,22 +1,22 @@
 {
  "url": "https://app.autolab.ai/hills/czaja107/beat-the-hotspot/leaderboard",
- "captured_utc": "2026-10-18T18:18:54.553Z",
- "captured_et": "14:18",
+ "captured_utc": "2026-10-18T18:25:13.693Z",
+ "captured_et": "14:25",
  "rows": [
   {
    "rank": 1,
    "climber": "wilsonwu-ai",
-   "score": 0.96406584,
-   "gpu": 101.73,
-   "hbm": 94.94,
+   "score": 0.96343762,
+   "gpu": 101.68,
+   "hbm": 94.87,
    "when": "2026-10-18"
   },
   {
    "rank": 2,
    "climber": "frido22",
-   "score": 0.96582485,
-   "gpu": 101.87,
-   "hbm": 93.31,
+   "score": 0.96519663,
+   "gpu": 101.82,
+   "hbm": 93.79,
    "when": "2026-10-18"
   },
   {
