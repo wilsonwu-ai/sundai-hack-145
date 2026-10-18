@@ -1,0 +1,1 @@
+{"name":"illegal_edge_clearance","layout":{"G0":[0.2,3.5],"H0":[21.0,3.5],"G1":[33.0,3.5],"H1":[33.5,15.5],"G2":[33.0,27.0],"H2":[21.0,27.3],"G3":[8.0,27.0],"H3":[8.4,15.5]},"ok":false,"error":"G0 violates package edge clearance","category":"edge"}

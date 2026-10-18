@@ -1,0 +1,9 @@
+[
+ {
+  "name": "Seeded random baseline",
+  "score": 1.0,
+  "worst_gpu_c": 104.59,
+  "worst_hbm_c": 97.68,
+  "source": "organizer reference_64.json"
+ }
+]

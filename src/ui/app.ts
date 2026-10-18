@@ -1,457 +1,345 @@
-import './styles.css'
-import type { HistoryPoint, Layout, OptimizeProgress, OptimizeResult, SolveResult } from '../contracts'
-import { solve } from '../engine/solver'
-import { PKG, WORKLOADS, applyWorkload, cloneLayout, defaultLayout } from '../engine/presets'
-import { WIRE_BUDGET, checkLegal, wireLength } from '../engine/constraints'
-import { optimize, optimizeSolverOnly } from '../engine/optimize'
-import { HeatMap, T_MAX, T_MIN, gradientCss } from './heatmap'
-import { renderChart, type Series } from './chart'
-import { attachDrag } from './drag'
+import { parseSubmission, routeSegments, spec, validateLayout, type Layout, type ValidateResult } from '../official'
+import { evaluateLowfiDetailed, predictScore, thermalModel, type Coef, type LowfiResult } from '../official/lowfi'
+import coefJson from '../official/data/coef.json'
+import bestJson from '../official/data/best.json'
+import resultsJson from '../official/data/results.json'
 
-const REPO = 'https://github.com/wilsonwu-ai/sundai-hack-145'
-const BUDGET = 150
-const H_COLD = PKG.hEff
-const H_MICRO = 60000
-const STORE_KEY = 'chipletchill.best.v1'
+const coef = coefJson as unknown as Coef
+const best = bestJson as unknown as Layout
+interface ResultRow { name: string; score: number; worst_gpu_c: number; worst_hbm_c: number; source: string }
+const results = resultsJson as unknown as ResultRow[]
 
-const PHASES: Record<OptimizeProgress['phase'], string> = {
-  sampling: 'Sampling layouts with the full solver',
-  training: 'Training the surrogate',
-  searching: 'Surrogate searching thousands of layouts',
-  verifying: 'Full solver verifying the best candidate',
-  done: 'Done',
+const [IW, IH] = spec.interposer_mm
+const DIES = Object.keys(spec.dies)
+const WLS = Object.keys(spec.workloads)
+const BUDGET = spec.port_rule.total_bandwidth_weighted_route_limit_gb_s_mm
+const PITCH = spec.port_rule.route_grid_pitch_mm
+const SWAP_MS = 400
+
+const BASELINE: Layout = {
+  G0: [7.563, 3.259], H0: [20.934, 3.584], G1: [33.272, 2.856], H1: [34.12, 15.888],
+  G2: [33.072, 27.366], H2: [20.77, 27.311], G3: [7.994, 27.611], H3: [8.748, 15.163],
 }
+const PRESETS: { id: string; label: string; layout: Layout }[] = [
+  { id: 'baseline', label: 'Baseline (organizer example)', layout: BASELINE },
+  ...Object.entries(spec.example_layouts_mm).map(([k, v]) => ({ id: k, label: `Spec example: ${k}`, layout: v as Layout })),
+  { id: 'best', label: 'Best AI layout', layout: best },
+]
 
-const fmt = (n: number): string => n.toFixed(1)
+const clone = (l: Layout): Layout => Object.fromEntries(Object.entries(l).map(([d, p]) => [d, [p[0], p[1]] as [number, number]]))
+const r3 = (x: number) => Math.round(x * 1000) / 1000
 
-function loadBest(): Record<string, number> {
-  try {
-    const raw = window.localStorage.getItem(STORE_KEY)
-    if (!raw) return {}
-    const o: unknown = JSON.parse(raw)
-    return o && typeof o === 'object' ? (o as Record<string, number>) : {}
-  } catch {
-    return {}
-  }
-}
-
-function saveBest(m: Record<string, number>): void {
-  try {
-    window.localStorage.setItem(STORE_KEY, JSON.stringify(m))
-  } catch {
-    /* storage unavailable: ignore */
-  }
-}
-
-function bestSeries(h: HistoryPoint[]): { x: number; y: number }[] {
-  const pts: { x: number; y: number }[] = []
-  let best = Infinity
-  for (const p of h) {
-    if (p.verified == null) continue
-    best = Math.min(best, p.verified)
-    pts.push({ x: p.solverCalls, y: best })
-  }
-  return pts
+// inferno-like ramp
+const RAMP: [number, number, number][] = [[0, 0, 4], [40, 11, 84], [101, 21, 110], [159, 42, 99], [212, 72, 66], [245, 125, 21], [250, 193, 39], [252, 255, 164]]
+function ramp(t: number): [number, number, number] {
+  const x = Math.min(1, Math.max(0, t)) * (RAMP.length - 1)
+  const i = Math.min(RAMP.length - 2, Math.floor(x))
+  const f = x - i
+  return [0, 1, 2].map((c) => RAMP[i][c] + (RAMP[i + 1][c] - RAMP[i][c]) * f) as [number, number, number]
 }
 
 export function mountApp(root: HTMLElement): void {
-  const ticks = [95, 80, 65, 50, 35]
   root.innerHTML = `
-  <div class="shell">
-    <header class="top">
-      <div>
-        <h1>ChipletChill</h1>
-        <p class="tag">Train a thermal surrogate in your browser, then let it find the coolest chiplet layout for a 1.36 kW 2035 GPU.</p>
+  <header>
+    <h1>ChipletChill: beat the hotspot</h1>
+    <p>Drag 4 GPUs and 4 HBM stacks around a 52 x 42 mm interposer, keep every rule legal, and see a live thermal score against the organizer baseline (lower is better, below 1 beats it). <a href="./explainer.html">How it works</a></p>
+  </header>
+  <div class="grid">
+    <section class="card" id="stage-card">
+      <h2>Interposer (to scale, drag dies)</h2>
+      <div class="stage"><canvas id="cv" data-testid="heatmap" aria-label="Interposer layout and heat map"></canvas></div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--gpu)"></i>GPU</span>
+        <span><i class="sw" style="background:var(--hbm)"></i>HBM</span>
+        <span><i class="sw" style="background:#7aa2ff"></i>primary link</span>
+        <span><i class="sw" style="background:#e879f9"></i>secondary link</span>
+        <span>dashed: cooling contact</span>
+        <span id="range"></span>
       </div>
-      <nav class="links" aria-label="Project links">
-        <a href="explainer.html">How it works (ELI5)</a>
-        <a href="${REPO}" target="_blank" rel="noopener">GitHub</a>
-      </nav>
-    </header>
-
-    <main class="layout">
-      <section class="stage" aria-label="Package heat map">
-        <p class="headline" data-testid="headline">Drag the chiplets. Can you beat the AI?</p>
-        <div class="map-row">
-          <div class="map-wrap"><canvas id="map" role="img" aria-label="Heat map of the 60 by 60 millimetre package with chiplets"></canvas></div>
-          <div class="cbar" aria-hidden="true">
-            <div class="cbar-grad" style="background:${gradientCss()}"></div>
-            ${ticks
-              .map((t) => `<span style="bottom:${((t - T_MIN) / (T_MAX - T_MIN)) * 100}%">${t}</span>`)
-              .join('')}
-          </div>
-        </div>
-        <p class="legend"><span class="k k-c">C compute</span><span class="k k-m">M HBM</span><span class="k k-i">IO</span><span class="scale">Colour scale fixed at ${T_MIN} to ${T_MAX} °C</span></p>
-      </section>
-
-      <section class="panel" aria-label="Controls and results">
-        <div class="readout" aria-live="polite">
-          <div class="peak-label">Peak temperature</div>
-          <div class="peak" id="tmax" data-testid="tmax">--</div>
-          <div class="legal" id="legal" data-testid="legal">--</div>
-        </div>
-        <div class="wirebox">
-          <div class="row"><span>Wire length</span><span id="wiretext" class="mono"></span></div>
-          <div class="bar" data-testid="wire" id="wire" role="progressbar" aria-label="Wire length used" aria-valuemin="0" aria-valuemax="100"><div class="fill" id="wirefill"></div></div>
-        </div>
-        <p class="best mono" id="best"></p>
-
-        <div class="fields">
-          <label>Workload
-            <select id="workload" data-testid="workload">${WORKLOADS.map((w) => `<option value="${w.id}">${w.label}</option>`).join('')}</select>
-          </label>
-          <p class="blurb" id="blurb"></p>
-          <label>Cooling
-            <select id="cooling" data-testid="cooling">
-              <option value="${H_COLD}">Cold plate (h = 20,000 W/m²K)</option>
-              <option value="${H_MICRO}">In-chip microfluidics (h = 60,000 W/m²K)</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="buttons">
-          <button id="run" class="primary" data-testid="run" type="button">Run AI optimizer</button>
-          <button id="stop" type="button" hidden>Stop</button>
-          <button id="reset" type="button">Reset</button>
-        </div>
-
-        <div id="progress" class="progress" hidden>
-          <p class="phase" id="phase" aria-live="polite"></p>
-          <p class="counters mono"><span>Full solves: <b id="csolve">0</b></span><span>Surrogate predictions: <b id="csur">0</b></span></p>
-          <svg id="chart" class="chart" data-testid="chart" role="img" aria-label="Best verified peak temperature versus full-solver calls"></svg>
-          <p class="chart-legend"><span class="sw sw-a"></span>Surrogate loop <span class="sw sw-b"></span>Solver only (same budget)</p>
-        </div>
-
-        <div id="result" class="result" data-testid="result" hidden>
-          <h2 id="resulthead"></h2>
-          <dl class="stats mono" id="stats"></dl>
-          <div class="buttons">
-            <button id="toggle" type="button">Show start</button>
-            <button id="beat" type="button">Try to beat it</button>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <section class="about" aria-label="What you are looking at">
-      <h2>What you're looking at</h2>
-      <ul>
-        <li>The package is modelled as a 2D heat-spreading plate: each chiplet injects watts, the interposer spreads them sideways and drops heat into the coolant.</li>
-        <li>The full solver is the ground truth. It takes about 3 ms per layout.</li>
-        <li>The surrogate is a small model trained in your browser. It only proposes layouts; it never gets the last word.</li>
-        <li>Every temperature shown here is re-checked by the full solver, and every AI layout stays inside the wire budget.</li>
-      </ul>
-      <p><a href="${REPO}/blob/main/research/brief.md" target="_blank" rel="noopener">Sources and assumptions (research/brief.md)</a></p>
+      <p class="note">Heat map: die-plane field from the low-fidelity solver for the selected workload (surrogate estimate).</p>
     </section>
-
-    <footer class="foot">Built at Sundai Hack 145 · MIT CSAIL · 18 Oct 2026 · MIT License</footer>
+    <section class="card" id="side">
+      <h2>Live result</h2>
+      <div id="legal" data-testid="legal" class="badge ok">LEGAL</div>
+      <div class="kpis">
+        <div class="kpi"><small>Score (surrogate estimate)</small><b id="score" data-testid="score">-</b></div>
+        <div class="kpi"><small>Worst GPU C</small><b id="gpu" data-testid="gpu">-</b></div>
+        <div class="kpi"><small>Worst HBM C</small><b id="hbm" data-testid="hbm">-</b></div>
+      </div>
+      <p class="note">Score is the worse of GPU and HBM rise over ambient, relative to the baseline. Estimated from a fast model plus a fitted correction, not a HotSpot run.</p>
+      <div style="margin-top:10px">
+        <div id="budget" data-testid="budget">-</div>
+        <div class="bar" id="budgetbar"><i></i></div>
+      </div>
+      <div style="margin-top:12px">
+        <label class="field" for="workload">Workload</label>
+        <select id="workload" data-testid="workload">${WLS.map((w) => `<option value="${w}">${w.replace(/_/g, ' ')}</option>`).join('')}</select>
+      </div>
+      <table style="margin-top:10px"><thead><tr><th>Die</th><th class="n">Peak C (surrogate estimate)</th></tr></thead><tbody id="peaks"></tbody></table>
+      <div class="row">
+        <select id="preset-select" aria-label="Preset">${PRESETS.map((p) => `<option value="${p.id}">${p.label}</option>`).join('')}</select>
+        <button id="preset" data-testid="preset" type="button">Load preset</button>
+      </div>
+      <div class="row">
+        <button id="download" data-testid="download" type="button">Download submission.json</button>
+        <label class="btn" for="upload">Upload submission.json</label>
+        <input id="upload" data-testid="upload" type="file" accept="application/json,.json" />
+      </div>
+      <div class="err" id="msg" role="status"></div>
+    </section>
+    <section class="card full">
+      <h2>HotSpot-verified results</h2>
+      <p class="note" style="margin:0 0 6px">HotSpot, 64x64, organizer pipeline.</p>
+      <table data-testid="results"><thead><tr><th>Layout</th><th class="n">Score</th><th class="n">Worst GPU C</th><th class="n">Worst HBM C</th><th>Source</th></tr></thead>
+      <tbody>${results.map((r) => `<tr><td>${esc(r.name)}</td><td class="n">${r.score.toFixed(3)}</td><td class="n">${r.worst_gpu_c.toFixed(2)}</td><td class="n">${r.worst_hbm_c.toFixed(2)}</td><td>${esc(r.source)}</td></tr>`).join('')}</tbody></table>
+    </section>
   </div>`
 
-  const q = <T extends Element>(sel: string): T => {
-    const e = root.querySelector<T>(sel)
-    if (!e) throw new Error(`missing ${sel}`)
-    return e
-  }
-  const canvas = q<HTMLCanvasElement>('#map')
-  const elTmax = q<HTMLElement>('#tmax')
-  const elLegal = q<HTMLElement>('#legal')
-  const elWire = q<HTMLElement>('#wire')
-  const elWireFill = q<HTMLElement>('#wirefill')
-  const elWireText = q<HTMLElement>('#wiretext')
-  const elBest = q<HTMLElement>('#best')
-  const selWork = q<HTMLSelectElement>('#workload')
-  const selCool = q<HTMLSelectElement>('#cooling')
-  const elBlurb = q<HTMLElement>('#blurb')
-  const btnRun = q<HTMLButtonElement>('#run')
-  const btnStop = q<HTMLButtonElement>('#stop')
-  const btnReset = q<HTMLButtonElement>('#reset')
-  const elProgress = q<HTMLElement>('#progress')
-  const elPhase = q<HTMLElement>('#phase')
-  const elCSolve = q<HTMLElement>('#csolve')
-  const elCSur = q<HTMLElement>('#csur')
-  const svg = q<SVGSVGElement>('#chart')
-  const elResult = q<HTMLElement>('#result')
-  const elResultHead = q<HTMLElement>('#resulthead')
-  const elStats = q<HTMLElement>('#stats')
-  const btnToggle = q<HTMLButtonElement>('#toggle')
-  const btnBeat = q<HTMLButtonElement>('#beat')
-  const elHeadline = q<HTMLElement>('[data-testid="headline"]')
+  const $ = <T extends HTMLElement>(id: string) => root.querySelector<T>('#' + id)!
+  const cv = $<HTMLCanvasElement>('cv')
+  const ctx = cv.getContext('2d')!
+  const heatCanvas = document.createElement('canvas')
 
-  const map = new HeatMap(canvas)
+  let layout: Layout = clone(BASELINE)
+  let valid: ValidateResult = validateLayout(layout)
+  let lf: LowfiResult | null = null
+  let lfKey = ''
+  let wl = WLS[0]
+  let dragging: { die: string; dx: number; dy: number } | null = null
+  let lastHeavy = 0
+  let timer: ReturnType<typeof setTimeout> | undefined
+  let scale = 1
 
-  let workloadId = WORKLOADS[0].id
-  let hEff = H_COLD
-  let mode: 'drag' | 'running' | 'result' = 'drag'
-  let showing: 'start' | 'ai' | 'custom' = 'custom'
-  let stopRequested = false
-  let startLayout: Layout | null = null
-  let aiResult: OptimizeResult | null = null
-  let grabbed: string | null = null
-  let lastRes: SolveResult | null = null
-  let rafPending = false
-
-  const workload = () => WORKLOADS.find((w) => w.id === workloadId) ?? WORKLOADS[0]
-
-  const freshLayout = (): Layout => {
-    const l = applyWorkload(cloneLayout(defaultLayout()), workload())
-    l.pkg = { ...l.pkg, hEff }
-    return l
+  const toMm = (e: PointerEvent): [number, number] => {
+    const r = cv.getBoundingClientRect()
+    return [((e.clientX - r.left) / r.width) * IW, (1 - (e.clientY - r.top) / r.height) * IH]
   }
 
-  let layout: Layout = freshLayout()
-
-  const bestKey = (): string => `${workloadId}|${hEff}`
-
-  function render(): void {
-    rafPending = false
-    const res = solve(layout)
-    lastRes = res
-    const why = checkLegal(layout)
-    const legal = why === null
-    map.draw(layout, res, { legal, showLinks: true, highlightId: grabbed })
-
-    elTmax.textContent = `${fmt(res.tMax)} °C`
-    elTmax.classList.toggle('grey', !legal)
-    elLegal.textContent = legal ? 'Legal' : why
-    elLegal.classList.toggle('bad', !legal)
-    elLegal.classList.toggle('ok', legal)
-
-    const wl = wireLength(layout)
-    const pct = (wl / WIRE_BUDGET) * 100
-    elWireFill.style.width = `${Math.min(100, pct)}%`
-    elWire.classList.toggle('over', wl > WIRE_BUDGET + 1e-9)
-    elWire.setAttribute('aria-valuenow', String(Math.round(Math.min(100, pct))))
-    elWireText.textContent = `${fmt(wl)} / ${fmt(WIRE_BUDGET)} mm`
-
-    if (legal && mode !== 'running') {
-      const best = loadBest()
-      const k = bestKey()
-      if (best[k] === undefined || res.tMax < best[k]) {
-        best[k] = res.tMax
-        saveBest(best)
-      }
-    }
-    const stored = loadBest()[bestKey()]
-    let line = stored !== undefined ? `Your best legal score: ${fmt(stored)} °C` : 'Your best legal score: none yet'
-    if (aiResult) line += ` · AI: ${fmt(aiResult.bestTMax)} °C`
-    elBest.textContent = line
-  }
-
-  function schedule(): void {
-    if (rafPending) return
-    rafPending = true
-    requestAnimationFrame(render)
-  }
-
-  function setBusy(busy: boolean): void {
-    btnRun.disabled = busy
-    btnReset.disabled = busy
-    selWork.disabled = busy
-    selCool.disabled = busy
-    btnStop.hidden = !busy
-    canvas.style.cursor = busy ? 'default' : 'grab'
-  }
-
-  function clearResult(): void {
-    aiResult = null
-    startLayout = null
-    elResult.hidden = true
-    elProgress.hidden = true
-    elHeadline.textContent = 'Drag the chiplets. Can you beat the AI?'
-  }
-
-  function setBlurb(): void {
-    elBlurb.textContent = workload().blurb
-  }
-
-  function updateToggle(): void {
-    btnToggle.textContent = showing === 'ai' ? 'Show start' : 'Show AI layout'
-  }
-
-  function showResult(startT: number, ai: OptimizeResult, base: OptimizeResult | null): void {
-    const delta = startT - ai.bestTMax
-    elHeadline.textContent = `AI-designed 2035 GPU package runs ${fmt(delta)} °C cooler under the same wire budget`
-    elResultHead.textContent = `${fmt(delta)} °C cooler, same wire budget`
-    const rows: [string, string, string?][] = [
-      ['Start peak', `${fmt(startT)} °C`],
-      ['AI peak', `${fmt(ai.bestTMax)} °C`, 'ai-tmax'],
-      ['Change', `${delta >= 0 ? '-' : '+'}${fmt(Math.abs(delta))} °C`],
-      ['Full solver calls', String(ai.solverCalls)],
-      ['Surrogate predictions', String(ai.surrogateCalls)],
-      ['Surrogate MAE', `${ai.surrogateMAE.toFixed(2)} °C`],
-      ['vs solver-only at same budget', base ? `${fmt(base.bestTMax)} °C` : 'skipped (stopped early)'],
-    ]
-    elStats.innerHTML = rows
-      .map(([k, v, id]) => `<div><dt>${k}</dt><dd${id ? ` data-testid="${id}"` : ''}>${v}</dd></div>`)
-      .join('')
-    elResult.hidden = false
-    updateToggle()
-  }
-
-  async function run(): Promise<void> {
-    if (mode === 'running') return
-    const startL = checkLegal(layout) === null ? cloneLayout(layout) : freshLayout()
-    const startT = solve(startL).tMax
-    startLayout = cloneLayout(startL)
-    aiResult = null
-    elResult.hidden = true
-    elHeadline.textContent = 'The AI is working...'
-    layout = cloneLayout(startL)
-    mode = 'running'
-    showing = 'custom'
-    stopRequested = false
-    setBusy(true)
-    elProgress.hidden = false
-    let aSeries: Series['pts'] = []
-    let bSeries: Series['pts'] = []
-    const draw = (): void =>
-      renderChart(
-        svg,
-        [
-          { label: 'Surrogate loop', color: 'var(--accent)', pts: aSeries },
-          { label: 'Solver only (same budget)', color: 'var(--muted-line)', pts: bSeries },
-        ],
-        BUDGET,
-      )
+  function resize() {
+    const r = cv.getBoundingClientRect()
+    const dpr = window.devicePixelRatio || 1
+    cv.width = Math.max(1, Math.round(r.width * dpr))
+    cv.height = Math.max(1, Math.round(r.height * dpr))
+    scale = cv.width / IW
     draw()
-    schedule()
+  }
 
-    let ai: OptimizeResult | null = null
-    let base: OptimizeResult | null = null
+  function draw() {
+    const W = cv.width, Hh = cv.height
+    const X = (mm: number) => mm * scale
+    const Y = (mm: number) => Hh - mm * scale
+    ctx.clearRect(0, 0, W, Hh)
+    ctx.fillStyle = '#05080c'
+    ctx.fillRect(0, 0, W, Hh)
+    const rangeEl = $('range')
+    if (lf && valid.ok) {
+      const f = lf.fields[wl]
+      let lo = Infinity, hi = -Infinity
+      for (const v of f) { if (v < lo) lo = v; if (v > hi) hi = v }
+      heatCanvas.width = lf.nx; heatCanvas.height = lf.ny
+      const hc = heatCanvas.getContext('2d')!
+      const img = hc.createImageData(lf.nx, lf.ny)
+      for (let j = 0; j < lf.ny; j++) for (let i = 0; i < lf.nx; i++) {
+        const [r, g, b] = ramp((f[j * lf.nx + i] - lo) / Math.max(1e-9, hi - lo))
+        const o = ((lf.ny - 1 - j) * lf.nx + i) * 4
+        img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = b; img.data[o + 3] = 255
+      }
+      hc.putImageData(img, 0, 0)
+      ctx.imageSmoothingEnabled = true
+      ctx.drawImage(heatCanvas, 0, 0, W, Hh)
+      rangeEl.textContent = `heat ${lo.toFixed(1)} to ${hi.toFixed(1)} C (low-fi)`
+    } else {
+      rangeEl.textContent = ''
+    }
+    // cooling contact
+    const [cx, cy, cw, ch] = thermalModel.cooling_contact_rect_mm
+    ctx.save()
+    ctx.setLineDash([6 * (scale / 8), 4 * (scale / 8)])
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)'
+    ctx.lineWidth = Math.max(1, scale / 8)
+    ctx.strokeRect(X(cx), Y(cy + ch), cw * scale, ch * scale)
+    ctx.restore()
+    // wires
+    if (valid.ok) {
+      ctx.lineWidth = Math.max(1.5, scale * 0.28)
+      ctx.lineJoin = 'round'
+      for (const [id, route] of Object.entries(valid.routes)) {
+        ctx.strokeStyle = id.startsWith('P') ? '#7aa2ff' : '#e879f9'
+        ctx.beginPath()
+        for (const [a, b] of routeSegments(route, PITCH)) { ctx.moveTo(X(a[0]), Y(a[1])); ctx.lineTo(X(b[0]), Y(b[1])) }
+        ctx.stroke()
+      }
+    }
+    // dies
+    ctx.font = `600 ${Math.max(10, scale * 1.9)}px system-ui, sans-serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    for (const d of DIES) {
+      const [x, y] = layout[d]
+      const [w, h] = spec.dies[d].size_mm
+      const col = spec.dies[d].kind === 'GPU' ? '255,138,61' : '61,214,198'
+      ctx.fillStyle = `rgba(${col},0.28)`
+      ctx.strokeStyle = `rgb(${col})`
+      ctx.lineWidth = Math.max(1.5, scale / 5) * (dragging?.die === d ? 1.8 : 1)
+      ctx.fillRect(X(x), Y(y + h), w * scale, h * scale)
+      ctx.strokeRect(X(x), Y(y + h), w * scale, h * scale)
+      ctx.fillStyle = '#fff'
+      ctx.fillText(d, X(x + w / 2), Y(y + h / 2))
+    }
+  }
+
+  function fmt(n: number, d = 2) { return n.toFixed(d) }
+
+  function renderNumbers() {
+    const legalEl = $('legal')
+    const dl = $<HTMLButtonElement>('download')
+    const stage = $('side')
+    if (!valid.ok) {
+      legalEl.className = 'badge bad'
+      legalEl.textContent = `ILLEGAL: ${valid.reason}`
+      for (const id of ['score', 'gpu', 'hbm']) $(id).textContent = '-'
+      $('score').className = ''
+      $('budget').textContent = 'Budget: n/a for an illegal layout'
+      $('budgetbar').className = 'bar'
+      $('budgetbar').firstElementChild!.setAttribute('style', 'width:0')
+      $('peaks').innerHTML = ''
+      dl.disabled = true
+      return
+    }
+    legalEl.className = 'badge ok'
+    legalEl.textContent = 'LEGAL'
+    dl.disabled = false
+    const used = valid.weightedBudget
+    $('budget').textContent = `Budget: ${fmt(used, 1)} / ${BUDGET} GB/s·mm (${fmt((used / BUDGET) * 100, 1)}%)`
+    $('budgetbar').className = 'bar' + (used > BUDGET ? ' over' : '')
+    $('budgetbar').firstElementChild!.setAttribute('style', `width:${Math.min(100, (used / BUDGET) * 100)}%`)
+    const fresh = lf && lfKey === key()
+    stage.classList.toggle('stale', !fresh)
+    if (lf) {
+      const p = predictScore(lf.per, coef)
+      $('score').textContent = fmt(p.score, 3)
+      $('score').className = p.score < 1 ? 'win' : 'lose'
+      $('gpu').textContent = fmt(p.gpu, 1)
+      $('hbm').textContent = fmt(p.hbm, 1)
+      $('peaks').innerHTML = DIES.map((d) => {
+        const [a, b] = coef[`${d[0]}|${wl}`]
+        return `<tr><td>${d}</td><td class="n">${fmt(a * lf!.per[wl][d] + b, 1)}</td></tr>`
+      }).join('')
+    }
+  }
+
+  const key = () => JSON.stringify(layout)
+
+  function heavy() {
+    timer = undefined
+    valid = validateLayout(layout)
+    if (valid.ok) {
+      lastHeavy = performance.now()
+      lf = evaluateLowfiDetailed(layout, valid)
+      lfKey = key()
+    }
+    renderNumbers()
+    draw()
+  }
+
+  function schedule(immediate: boolean) {
+    if (timer) { clearTimeout(timer); timer = undefined }
+    const wait = immediate ? 0 : Math.max(0, SWAP_MS - (performance.now() - lastHeavy))
+    if (wait === 0) heavy()
+    else timer = setTimeout(heavy, wait)
+  }
+
+  function setLayout(l: Layout) {
+    layout = clone(l)
+    valid = validateLayout(layout)
+    $('msg').textContent = ''
+    renderNumbers()
+    draw()
+    schedule(true)
+  }
+
+  function hit(x: number, y: number): string | null {
+    for (const d of [...DIES].reverse()) {
+      const [px, py] = layout[d]
+      const [w, h] = spec.dies[d].size_mm
+      if (x >= px && x <= px + w && y >= py && y <= py + h) return d
+    }
+    return null
+  }
+
+  cv.addEventListener('pointerdown', (e) => {
+    const [x, y] = toMm(e)
+    const d = hit(x, y)
+    if (!d) return
+    dragging = { die: d, dx: x - layout[d][0], dy: y - layout[d][1] }
+    cv.setPointerCapture(e.pointerId)
+    cv.classList.add('dragging')
+    e.preventDefault()
+  })
+  cv.addEventListener('pointermove', (e) => {
+    if (!dragging) return
+    const [x, y] = toMm(e)
+    const [w, h] = spec.dies[dragging.die].size_mm
+    layout[dragging.die] = [r3(Math.min(IW - w, Math.max(0, x - dragging.dx))), r3(Math.min(IH - h, Math.max(0, y - dragging.dy)))]
+    valid = validateLayout(layout)
+    renderNumbers()
+    draw()
+    if (valid.ok) schedule(false)
+  })
+  const end = (e: PointerEvent) => {
+    if (!dragging) return
+    dragging = null
+    cv.classList.remove('dragging')
+    try { cv.releasePointerCapture(e.pointerId) } catch { /* already released */ }
+    schedule(true)
+  }
+  cv.addEventListener('pointerup', end)
+  cv.addEventListener('pointercancel', end)
+
+  $<HTMLSelectElement>('workload').addEventListener('change', (e) => {
+    wl = (e.target as HTMLSelectElement).value
+    renderNumbers()
+    draw()
+  })
+  $('preset').addEventListener('click', () => {
+    const id = $<HTMLSelectElement>('preset-select').value
+    setLayout(PRESETS.find((p) => p.id === id)!.layout)
+  })
+  $('download').addEventListener('click', () => {
+    if (!valid.ok) return
+    const out: Layout = {}
+    for (const d of DIES) out[d] = [r3(layout[d][0]), r3(layout[d][1])]
+    const blob = new Blob([JSON.stringify({ placements_mm: out }, null, 2) + '\n'], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'submission.json'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  })
+  $<HTMLInputElement>('upload').addEventListener('change', async (e) => {
+    const input = e.target as HTMLInputElement
+    const f = input.files?.[0]
+    if (!f) return
     try {
-      ai = await optimize(cloneLayout(startL), {
-        solverBudget: BUDGET,
-        surrogateBudget: 40000,
-        seed: 1,
-        shouldStop: () => stopRequested,
-        onProgress: (p) => {
-          elPhase.textContent = PHASES[p.phase]
-          elCSolve.textContent = String(p.solverCalls)
-          elCSur.textContent = String(p.surrogateCalls)
-          aSeries = bestSeries(p.history)
-          draw()
-          layout = cloneLayout(p.bestLayout)
-          schedule()
-        },
-      })
-      layout = cloneLayout(ai.best)
-      aSeries = bestSeries(ai.history)
-      draw()
-      schedule()
-      if (!stopRequested) {
-        base = await optimizeSolverOnly(cloneLayout(startL), {
-          solverBudget: BUDGET,
-          surrogateBudget: 40000,
-          seed: 1,
-          shouldStop: () => stopRequested,
-          onProgress: (p) => {
-            elPhase.textContent = `Solver-only baseline: ${p.solverCalls} of ${BUDGET} full solves`
-            bSeries = bestSeries(p.history)
-            draw()
-          },
-        })
-        bSeries = bestSeries(base.history)
-        draw()
-      }
+      const parsed = parseSubmission(JSON.parse(await f.text()))
+      if (!parsed.ok) { $('msg').textContent = `Upload rejected: ${parsed.reason}`; return }
+      setLayout(parsed.layout)
+      const v = validateLayout(parsed.layout)
+      $('msg').textContent = v.ok ? `Loaded ${f.name}` : `Loaded ${f.name}, but it is illegal: ${v.reason}`
     } catch (err) {
-      elPhase.textContent = `Optimizer error: ${err instanceof Error ? err.message : String(err)}`
+      $('msg').textContent = `Upload rejected: ${(err as Error).message}`
+    } finally {
+      input.value = ''
     }
-
-    mode = ai ? 'result' : 'drag'
-    setBusy(false)
-    if (ai) {
-      aiResult = ai
-      layout = cloneLayout(ai.best)
-      showing = 'ai'
-      elPhase.textContent = 'Done'
-      showResult(startT, ai, base)
-    } else {
-      layout = cloneLayout(startL)
-      elHeadline.textContent = 'Drag the chiplets. Can you beat the AI?'
-    }
-    schedule()
-  }
-
-  attachDrag(map, {
-    getLayout: () => layout,
-    enabled: () => mode !== 'running',
-    onGrab: (id) => {
-      grabbed = id
-      if (id && mode === 'result') {
-        mode = 'drag'
-        showing = 'custom'
-        updateToggle()
-      }
-      schedule()
-    },
-    onMove: (id, x, y) => {
-      const c = layout.chiplets.find((k) => k.id === id)
-      if (!c) return
-      c.x = x
-      c.y = y
-      schedule()
-    },
-    onEnd: () => schedule(),
   })
 
-  selWork.addEventListener('change', () => {
-    workloadId = selWork.value
-    layout = applyWorkload(cloneLayout(layout), workload())
-    clearResult()
-    mode = 'drag'
-    setBlurb()
-    schedule()
-  })
-  selCool.addEventListener('change', () => {
-    hEff = Number(selCool.value)
-    const l = cloneLayout(layout)
-    l.pkg.hEff = hEff
-    layout = l
-    clearResult()
-    mode = 'drag'
-    schedule()
-  })
-  btnReset.addEventListener('click', () => {
-    layout = freshLayout()
-    clearResult()
-    mode = 'drag'
-    showing = 'custom'
-    schedule()
-  })
-  btnRun.addEventListener('click', () => void run())
-  btnStop.addEventListener('click', () => {
-    stopRequested = true
-  })
-  btnToggle.addEventListener('click', () => {
-    if (!startLayout || !aiResult) return
-    if (showing === 'ai') {
-      layout = cloneLayout(startLayout)
-      showing = 'start'
-    } else {
-      layout = cloneLayout(aiResult.best)
-      showing = 'ai'
-    }
-    mode = 'result'
-    updateToggle()
-    schedule()
-  })
-  btnBeat.addEventListener('click', () => {
-    if (!aiResult) return
-    layout = cloneLayout(aiResult.best)
-    mode = 'drag'
-    showing = 'custom'
-    updateToggle()
-    schedule()
-  })
+  new ResizeObserver(resize).observe(cv)
+  resize()
+  setLayout(BASELINE)
+}
 
-  if (typeof ResizeObserver !== 'undefined') {
-    new ResizeObserver(() => {
-      if (map.resize() && lastRes) schedule()
-    }).observe(canvas)
-  }
-  window.addEventListener('resize', () => schedule())
-
-  setBlurb()
-  setBusy(false)
-  render()
+function esc(s: string): string {
+  return s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 }

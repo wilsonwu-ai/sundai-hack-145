@@ -1,0 +1,1 @@
+{"name":"illegal_capacity_two_links_one_side","layout":{"G0":[8.0,3.5],"H0":[21.0,3.5],"G1":[33.0,3.5],"H1":[33.5,15.5],"G2":[33.0,27.0],"H2":[21.0,27.3],"G3":[8.0,27.0],"H3":[20.5,15.0]},"ok":false,"error":"die-edge capacity: right requires 6.40 mm, has 6.30 mm","category":"capacity"}

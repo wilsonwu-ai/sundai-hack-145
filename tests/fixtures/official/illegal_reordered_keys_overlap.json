@@ -1,0 +1,1 @@
+{"name":"illegal_reordered_keys_overlap","layout":{"H3":[8.4,15.5],"G3":[8.0,27.0],"H2":[21.0,27.3],"G2":[33.0,27.0],"H1":[33.5,15.5],"G1":[33.5,15.5],"H0":[21.0,3.5],"G0":[8.0,3.5]},"ok":false,"error":"H1 and G1 violate 1.0 mm clearance","category":"gap"}

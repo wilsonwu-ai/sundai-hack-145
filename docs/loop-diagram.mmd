@@ -1,0 +1,16 @@
+graph LR
+  A["AutoLab hill: beat-the-hotspot<br/>challenge spec, 5 workloads"]
+  subgraph FAST["CHEAP AND FAST: about 0.6 s per layout"]
+    B["Legal layout generator<br/>official rules: clearance, gaps, ports, routed wires, budget"]
+    C["Physics surrogate<br/>3-layer stack + spreader + sink, ~0.6 s, plus learned correction per die type and workload"]
+    D["Simulated annealing<br/>6 chains x 200 steps on the surrogate"]
+  end
+  subgraph SLOW["SLOW AND EXACT: about 24 s"]
+    E["HotSpot judge<br/>ground truth, ~24 s, organizer pipeline"]
+  end
+  F["submission.json"]
+  G["AutoLab scoreboard"]
+  A --> B --> C --> D
+  D -->|"best 6 distinct candidates"| E
+  E -.->|"refit on every verified layout"| C
+  E --> F --> G

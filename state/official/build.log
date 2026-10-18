@@ -1,0 +1,37 @@
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c hotspot.c
+hotspot.c:450:87: warning: comparison of array 'table[idx].value' equal to a null pointer is always false [-Wtautological-pointer-compare]
+  450 |   if (((idx = get_str_index(table, size, "package_model_used")) >= 0) && !(table[idx].value==0)) {
+      |                                                                            ~~~~~~~~~~~^~~~~  ~
+1 warning generated.
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 hotspot.c > hotspot.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c microchannel.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 microchannel.c > microchannel.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c materials.c
+materials.c:175:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  175 | }
+      | ^
+1 warning generated.
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 materials.c > materials.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c temperature.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 temperature.c > temperature.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c RCutil.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 RCutil.c > RCutil.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c package.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 package.c > package.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c temperature_block.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 temperature_block.c > temperature_block.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c temperature_grid.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 temperature_grid.c > temperature_grid.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c flp.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 flp.c > flp.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c flp_desc.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 flp_desc.c > flp_desc.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c npe.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 npe.c > npe.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c shape.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 shape.c > shape.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c util.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 util.c > util.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -c wire.c
+gcc -MM -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 wire.c > wire.d
+gcc -O3    -DVERBOSE=1 -DMATHACCEL=0 -DSUPERLU=0 -o hotspot hotspot.o microchannel.o materials.o temperature.o RCutil.o package.o temperature_block.o temperature_grid.o flp.o flp_desc.o npe.o shape.o util.o wire.o -lm

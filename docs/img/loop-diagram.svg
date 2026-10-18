@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 710" width="1200" height="710" role="img" aria-labelledby="t d" font-family="Helvetica, Arial, sans-serif">
+  <title id="t">Surrogate-in-the-loop search for the AutoLab beat-the-hotspot challenge</title>
+  <desc id="d">Left to right flow. The AutoLab hill challenge feeds a legal layout generator, then a physics surrogate (about 0.6 seconds per layout), then simulated annealing (6 chains of 200 steps). Best candidates go to the HotSpot judge (ground truth, about 24 seconds), which feeds results back to the surrogate for a refit on every verified layout. Verified layouts become submission.json and go to the AutoLab scoreboard. The first group is cheap and fast; the HotSpot judge is slow and exact.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e6edf3"/></marker>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c084fc"/></marker>
+  </defs>
+  <rect width="1200" height="710" fill="#0b0f17"/>
+  <text x="600" y="36" text-anchor="middle" font-size="26" font-weight="700" fill="#e6edf3">Cheap surrogate searches, slow judge verifies</text>
+
+  <!-- speed bands -->
+  <rect x="300" y="62" width="890" height="228" rx="16" fill="#34d399" fill-opacity="0.07" stroke="#34d399" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="745" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="#34d399">CHEAP AND FAST: about 0.6 s per layout</text>
+  <rect x="300" y="410" width="290" height="270" rx="16" fill="#f59e0b" fill-opacity="0.07" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="445" y="662" text-anchor="middle" font-size="17" font-weight="700" fill="#f59e0b">SLOW AND EXACT: about 24 s</text>
+
+  <!-- row 1 nodes -->
+  <g fill="#151c2b" stroke="#60a5fa" stroke-width="2">
+    <rect x="10" y="105" width="250" height="165" rx="12"/>
+    <rect x="320" y="105" width="250" height="165" rx="12"/>
+    <rect x="630" y="105" width="250" height="165" rx="12"/>
+    <rect x="940" y="105" width="250" height="165" rx="12"/>
+  </g>
+  <g text-anchor="middle" font-size="22" font-weight="700" fill="#e6edf3" stroke="none">
+    <text x="135" y="137">AutoLab hill:</text><text x="135" y="162">beat-the-hotspot</text>
+    <text x="445" y="137">Legal layout</text><text x="445" y="162">generator</text>
+    <text x="755" y="139">Physics surrogate</text>
+    <text x="1065" y="139">Simulated annealing</text>
+  </g>
+  <g text-anchor="middle" font-size="16" fill="#aab4c3">
+    <text x="135" y="196">Challenge spec,</text><text x="135" y="218">5 workloads</text>
+    <text x="445" y="196">Official rules: clearance,</text><text x="445" y="218">gaps, ports, routed wires,</text><text x="445" y="240">budget</text>
+    <text x="755" y="170">3-layer stack + spreader</text><text x="755" y="192">+ sink, ~0.6 s, plus learned</text><text x="755" y="214">correction per die type</text><text x="755" y="236">and workload</text>
+    <text x="1065" y="176">6 chains x 200 steps</text><text x="1065" y="198">on the surrogate</text>
+  </g>
+
+  <!-- row 2 nodes -->
+  <g fill="#151c2b" stroke="#60a5fa" stroke-width="2">
+    <rect x="320" y="455" width="250" height="165" rx="12" stroke="#f59e0b"/>
+    <rect x="630" y="455" width="250" height="165" rx="12"/>
+    <rect x="940" y="455" width="250" height="165" rx="12"/>
+  </g>
+  <g text-anchor="middle" font-size="22" font-weight="700" fill="#e6edf3">
+    <text x="445" y="489">HotSpot judge</text>
+    <text x="755" y="489">submission.json</text>
+    <text x="1065" y="489">AutoLab scoreboard</text>
+  </g>
+  <g text-anchor="middle" font-size="16" fill="#aab4c3">
+    <text x="445" y="522">Ground truth, ~24 s,</text><text x="445" y="544">organizer pipeline</text>
+    <text x="755" y="522">Die placements in mm</text>
+    <text x="1065" y="522">Peak-temperature score</text>
+  </g>
+
+  <!-- arrows -->
+  <g stroke="#e6edf3" stroke-width="2.5" fill="none" marker-end="url(#a)">
+    <path d="M260,187 H318"/>
+    <path d="M570,187 H628"/>
+    <path d="M880,187 H938"/>
+    <path d="M1065,270 V370 H480 V453"/>
+    <path d="M570,537 H628"/>
+    <path d="M880,537 H938"/>
+  </g>
+  <text x="1055" y="394" text-anchor="end" font-size="16" fill="#aab4c3">best 6 distinct candidates</text>
+
+  <!-- feedback -->
+  <path d="M360,455 V335 H700 V272" stroke="#c084fc" stroke-width="2.5" stroke-dasharray="7 5" fill="none" marker-end="url(#f)"/>
+  <text x="365" y="324" font-size="16" font-weight="700" fill="#c084fc">refit on every verified layout</text>
+
+  <!-- tradeoff note -->
+  <g font-size="16" fill="#aab4c3">
+    <text x="630" y="655">Tradeoff: the surrogate screens up to 1,200</text>
+    <text x="630" y="677">layouts per round; HotSpot checks only the best.</text>
+  </g>
+</svg>

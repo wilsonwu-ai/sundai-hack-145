@@ -1,0 +1,16 @@
+[1/6 44s] loop_r0_0.json score=1.00729224 gpu=103.92 hbm=98.21 
+[2/6 44s] loop_r0_1.json score=1.00756742 gpu=103.92 hbm=98.23 
+[3/6 45s] loop_r0_2.json score=0.98906898 gpu=103.72 hbm=96.12 
+[4/6 91s] loop_r0_3.json score=0.98894333 gpu=103.71 hbm=96.09 
+[5/6 91s] loop_r0_4.json score=0.98869205 gpu=103.69 hbm=96.15 
+[6/6 91s] loop_r0_5.json score=0.98643046 gpu=103.51 hbm=95.95 
+ROUND {"round": 0, "n_train": 66, "train_mae": 0.0256, "predicted": [0.9519, 0.9521, 0.9574, 0.9575, 0.9577, 0.9578], "hotspot": [1.00729224, 1.00756742, 0.98906898, 0.98894333, 0.98869205, 0.98643046], "best_so_far": 0.97851489, "seconds": 137.4}
+[1/6 55s] loop_r1_0.json score=0.99698455 gpu=104.35 hbm=96.46 
+[2/6 55s] loop_r1_1.json score=0.99648197 gpu=104.31 hbm=96.54 
+[3/6 55s] loop_r1_2.json score=0.9968589 gpu=104.34 hbm=96.71 
+[4/6 112s] loop_r1_3.json score=0.99660761 gpu=104.32 hbm=97.38 
+[5/6 112s] loop_r1_4.json score=0.99648197 gpu=104.31 hbm=97.36 
+[6/6 112s] loop_r1_5.json score=0.99057671 gpu=103.84 hbm=96.67 
+ROUND {"round": 1, "n_train": 72, "train_mae": 0.028, "predicted": [0.9521, 0.9521, 0.9522, 0.9554, 0.9554, 0.9555], "hotspot": [0.99698455, 0.99648197, 0.9968589, 0.99660761, 0.99648197, 0.99057671], "best_so_far": 0.97851489, "seconds": 156.6}
+/opt/anaconda3/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

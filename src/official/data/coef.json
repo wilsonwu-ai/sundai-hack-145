@@ -1,0 +1,42 @@
+{
+ "G|tensor_training": [
+  1.0,
+  0
+ ],
+ "G|skewed_compute": [
+  1.0,
+  0
+ ],
+ "G|attention_decode": [
+  1.0,
+  0
+ ],
+ "G|memory_stream": [
+  1.0,
+  0
+ ],
+ "G|mixed_serving": [
+  1.0,
+  0
+ ],
+ "H|tensor_training": [
+  1.0,
+  0
+ ],
+ "H|skewed_compute": [
+  1.0,
+  0
+ ],
+ "H|attention_decode": [
+  1.0,
+  0
+ ],
+ "H|memory_stream": [
+  1.0,
+  0
+ ],
+ "H|mixed_serving": [
+  1.0,
+  0
+ ]
+}

@@ -1,0 +1,1 @@
+{"name":"illegal_gap","layout":{"G0":[8.0,3.5],"H0":[20.0,3.5],"G1":[33.0,3.5],"H1":[33.5,15.5],"G2":[33.0,27.0],"H2":[21.0,27.3],"G3":[8.0,27.0],"H3":[8.4,15.5]},"ok":false,"error":"G0 and H0 violate 1.0 mm clearance","category":"gap"}
