@@ -1,0 +1,23 @@
+{
+ "note": "128 x 128 finalist mesh (hill --final, reference_128.json); scores are not comparable with 64 x 64",
+ "rows": [
+  {
+   "label": "our polished layout, AutoLab a83faf5a",
+   "key": "ours",
+   "score64": 0.96230682,
+   "score128": 0.96501129,
+   "gpu": 101.95,
+   "hbm": 94.92,
+   "source": "local judge --grid 128 (layout held until the hack ends)"
+  },
+  {
+   "label": "an earlier local layout",
+   "key": "earlier",
+   "score64": 0.96783516,
+   "score128": 0.97052922,
+   "gpu": 102.39,
+   "hbm": 95.31,
+   "source": "state/official/final128.jsonl"
+  }
+ ]
+}

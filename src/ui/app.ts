@@ -23,7 +23,7 @@ const BASELINE: Layout = {
 const PRESETS: { id: string; label: string; layout: Layout }[] = [
   { id: 'baseline', label: 'Baseline (organizer example)', layout: BASELINE },
   ...Object.entries(spec.example_layouts_mm).map(([k, v]) => ({ id: k, label: `Spec example: ${k}`, layout: v as Layout })),
-  { id: 'best', label: 'Best AI layout', layout: best },
+  { id: 'best', label: 'Best public layout', layout: best },
 ]
 
 // Layouts HotSpot has judged through the organizer pipeline (64 x 64). The surrogate cannot rank

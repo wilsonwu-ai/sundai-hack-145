@@ -1,34 +1,50 @@
 {
  "url": "https://app.autolab.ai/hills/czaja107/beat-the-hotspot/leaderboard",
- "captured_utc": "2026-10-18T18:41:12.905Z",
- "captured_et": "14:41",
+ "captured_utc": "2026-10-18T21:52:37.608Z",
+ "captured_et": "17:52",
  "rows": [
   {
    "rank": 1,
-   "climber": "wilsonwu-ai",
-   "score": 0.96230682,
-   "gpu": 101.59,
-   "hbm": 94.73,
+   "climber": "zaiba6",
+   "score": 0.95979394,
+   "gpu": 101.39,
+   "hbm": 94.15,
    "when": "2026-10-18"
   },
   {
    "rank": 2,
-   "climber": "frido22",
-   "score": 0.96469406,
-   "gpu": 101.78,
-   "hbm": 93.88,
+   "climber": "vyahhi",
+   "score": 0.95979394,
+   "gpu": 101.39,
+   "hbm": 94.73,
    "when": "2026-10-18"
   },
   {
    "rank": 3,
-   "climber": "vyahhi",
-   "score": 0.96494534,
-   "gpu": 101.8,
-   "hbm": 92.87,
+   "climber": "charliemags",
+   "score": 0.95991959,
+   "gpu": 101.4,
+   "hbm": 94.16,
    "when": "2026-10-18"
   },
   {
    "rank": 4,
+   "climber": "frido22",
+   "score": 0.9607991,
+   "gpu": 101.47,
+   "hbm": 94.74,
+   "when": "2026-10-18"
+  },
+  {
+   "rank": 5,
+   "climber": "wilsonwu-ai",
+   "score": 0.96180425,
+   "gpu": 101.55,
+   "hbm": 94.72,
+   "when": "2026-10-18"
+  },
+  {
+   "rank": 6,
    "climber": "ottogin",
    "score": 0.9679608,
    "gpu": 102.04,
@@ -36,11 +52,19 @@
    "when": "2026-10-18"
   },
   {
-   "rank": 5,
+   "rank": 7,
    "climber": "czaja107",
    "score": 0.96846337,
    "gpu": 102.08,
    "hbm": 94.13,
+   "when": "2026-10-18"
+  },
+  {
+   "rank": 8,
+   "climber": "5hishir01",
+   "score": 0.97977133,
+   "gpu": 102.98,
+   "hbm": 94.62,
    "when": "2026-10-18"
   }
  ]

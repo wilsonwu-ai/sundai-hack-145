@@ -5,6 +5,8 @@ Anchors (all in the repo):
   state/official/leaderboard_snapshot.json  rows + capture time (scripts/shoot-leaderboard.mjs)
   state/official/autolab_runs.json          our official AutoLab runs (score, GPU, HBM, experiment)
   state/official/convergence_check.json     HotSpot stopping-rule error (scripts/official/convergence.py)
+  state/official/samples.jsonl              local-judge rows (surrogate loop v2, random layouts)
+  state/official/final128_summary.json      128 x 128 finalist-mesh scores, layout-free
 
 Targets: README.md, public/explainer.html, docs/sundai-card.md, video/data.json,
 src/official/data/best.json and the verified-badge entry in src/ui/app.ts. Each block
@@ -33,6 +35,16 @@ others = [r for r in rows if r["climber"] != "wilsonwu-ai"]
 best_other = min(others, key=lambda r: r["score"])
 T = snap["captured_et"]
 err = max(v["solver_error_c"] for v in conv.values())
+NUM = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight"}
+samples = [json.loads(l) for l in (ST / "samples.jsonl").read_text().splitlines() if l.strip()]
+rand = [s for s in samples if s.get("source") == "random_s145" and s["passed"]]
+best_rand = min(rand, key=lambda s: s["score"])
+best_v2 = min((s for s in samples if str(s.get("source", "")).startswith("loop2") and s["passed"]),
+              key=lambda s: s["score"])
+mesh = json.loads((ST / "final128_summary.json").read_text())["rows"]
+hist = [json.loads(l) for l in (ST / "board_history.jsonl").read_text().splitlines() if l.strip()]
+held1 = [h["captured_et"] for h in hist if any(r["climber"] == "wilsonwu-ai" and r["rank"] == 1 for r in h["rows"])]
+held1_txt = f" We held #1 from {held1[0]} ET to at least {held1[-1]} ET." if held1 else ""
 
 assert abs(me["score"] - ours["score"]) < 1e-9, "snapshot and autolab_runs.json disagree on our score"
 
@@ -60,25 +72,27 @@ if me["rank"] == 1:
                  f'at {s5(best_other["score"])}.</p>')
     lead = (f"We lead by {steps} rounding step{'s' if steps != 1 else ''} at {T} ET: {c2(ours['gpu'])} C against "
             f"{c2(best_other['gpu'])} C on the hottest GPU. The judge rounds every die temperature to 0.01 C, so the "
-            f"board moves in steps of {STEP:.6f}, and it moved all afternoon.")
+            f"board moves in steps of {STEP:.6f}.")
     card_rank = f"#1 on the AutoLab beat-the-hotspot leaderboard ({s5(ours['score'])} at {T} ET)"
 else:
     leader = rows[0]
     head_md = (f"**#{me['rank']} on the AutoLab `beat-the-hotspot` leaderboard at {T} ET on 18 Oct: score "
                f"{ours['score']:.8f}** (seeded baseline 1.0, lower is better). {leader['climber']} leads at "
-               f"{leader['score']:.8f}.")
+               f"{leader['score']:.8f}.{held1_txt}")
     head_html = (f'<p class="lead"><b>#{me["rank"]} on the AutoLab beat-the-hotspot leaderboard</b> at {T} ET on '
                  f'18 Oct, score <b>{s5(ours["score"])}</b> (baseline 1.0, lower is better). {leader["climber"]} '
-                 f'leads at {s5(leader["score"])}.</p>')
-    lead = (f"We are {-steps} rounding step(s) behind at {T} ET. The judge rounds every die temperature to 0.01 C, "
+                 f'leads at {s5(leader["score"])}.{held1_txt}</p>')
+    lead = (f"We are {-steps} rounding steps behind {best_other['climber']} at {T} ET ({c2(ours['gpu'])} C against "
+            f"{c2(best_other['gpu'])} C on the hottest GPU).{held1_txt} The judge rounds every die temperature to 0.01 C, "
             f"so the board moves in steps of {STEP:.6f}.")
     card_rank = f"#{me['rank']} on the AutoLab beat-the-hotspot leaderboard ({s5(ours['score'])} at {T} ET)"
 
 board = [(f"{r['climber']}{' (ours)' if r['climber'] == 'wilsonwu-ai' else ''}, AutoLab #{r['rank']}",
           r["score"], r["gpu"], r["hbm"], r["climber"] == "wilsonwu-ai") for r in rows[:5]]
 history = [(f"Ours, first AutoLab submission (HotSpot polish)", first["score"], first["gpu"], first["hbm"], False),
-           ("Ours, surrogate loop v2 only", 0.97399, 102.52, 94.47, False),
-           ("Best of 66 random legal layouts", 0.97851, 102.88, 95.81, False),
+           ("Ours, surrogate loop v2 only", best_v2["score"], best_v2["worst_gpu_c"], best_v2["worst_hbm_c"], False),
+           (f"Best of {len(rand)} random legal layouts", best_rand["score"], best_rand["worst_gpu_c"],
+            best_rand["worst_hbm_c"], False),
            ("Seeded random baseline", 1.0, 104.59, 97.68, False)]
 table_md = ["| Run | Score (64 x 64) | Hottest GPU C | Hottest HBM C |", "|---|---|---|---|"]
 for name, sc, g, h, bold in board + history:
@@ -100,17 +114,40 @@ fine_md = (f"5. **Fine polish below the rounding step.** `scripts/official/fine.
            f"drops. {moved_txt} {s5(first['score'])} to "
            f"{s5(ours['score'])}, confirmed by the unmodified judge and by AutoLab.")
 held = [r for r in runs["runs"] if not r.get("public", True)]
-held_txt = (f"The layout behind {', '.join(s5(r['score']) for r in held)} is held back until the hack ends, so "
-            f"nobody starts from it mid-race; the app and `src/official/data/best.json` carry our best public layout "
-            f"({s5(pub['score'])}). Every score above is official either way." if held else "")
-limits_md = (f"- {lead}\n" + (f"- {held_txt}\n" if held else "") +
+def held_txt(code):
+    return (f"The exact layouts behind {', '.join(s5(r['score']) for r in held)} are held back until the hack ends, "
+            f"so nobody starts from them mid-race. The app and {code('src/official/data/best.json')} carry our best "
+            f"public layout ({s5(pub['score'])}); the held layouts are small moves from it, so some die positions "
+            f"match. Every score above is official either way.")
+
+
+md_code = lambda s: f"`{s}`"
+html_code = lambda s: f'<span class="mono">{s}</span>'
+conv_txt = (f"HotSpot's default stopping rule leaves about {err:.4f} C of error on G0, the binding die, measured on "
+            f"{NUM.get(len(conv), len(conv))} layouts from this stage")
+earlier = next(m for m in mesh if m["key"] == "earlier")
+top128 = next((m for m in mesh if m["key"] == "ours"), None)
+mesh_lead = ("128 x 128 finalist check (the hill's --final mesh, scored against its own 128 x 128 reference, so "
+             "never compared with the 64 x 64 numbers above): ")
+mesh_rows = "; ".join(f"{s5(m['score128'])} for {m['label']} ({s5(m['score64'])} at 64 x 64, GPU {c2(m['gpu'])} C, "
+                      f"HBM {c2(m['hbm'])} C)" for m in ([top128] if top128 else []) + [earlier])
+if top128:
+    d = earlier["score128"] - top128["score128"]
+    mesh_end = (f". On the finer mesh the polished layout beats the earlier one by {d:.5f}, so the polish is not a "
+                f"64 x 64 artefact." if d > 0 else
+                f". On the finer mesh the polished layout does not beat the earlier one, so part of the 64 x 64 gain does "
+                f"not carry over.")
+else:
+    mesh_end = ". We have not yet run our best layout at 128 x 128."
+mesh_txt = mesh_lead + mesh_rows + mesh_end
+limits_md = (f"- {lead}\n" + (f"- {held_txt(md_code)}\n" if held else "") +
              f"- The last stage ranks candidates on unrounded HotSpot output from a private build. Every number we "
-             f"report comes from the unmodified judge and from AutoLab. HotSpot's default stopping rule leaves about "
-             f"{err:.4f} C of error on the binding die (`state/official/convergence_check.json`), much smaller than the "
+             f"report comes from the unmodified judge and from AutoLab. {conv_txt} "
+             f"(`state/official/convergence_check.json`), much smaller than the "
              f"{c2(first['gpu'] - ours['gpu'])} C this stage found.")
 
 blocks_md = {"headline": head_md, "board": "\n".join(table_md), "official": official_md,
-             "fine": fine_md, "limits": limits_md}
+             "fine": fine_md, "limits": limits_md, "mesh128": f"- **{mesh_txt.split(' (', 1)[0]}** (" + mesh_txt.split(' (', 1)[1]}
 
 alt = (f"AutoLab leaderboard at {T} ET: " +
        ", ".join(f"{r['climber']} #{r['rank']} at {r['score']:.8f}" for r in rows[:3]))
@@ -131,11 +168,11 @@ blocks_html = {
              f"only when the unrounded worst case over all five workloads dropped. {moved_txt} "
              f"That took the score from {s5(first['score'])} to <b>{s5(ours['score'])}</b>, confirmed by "
              f"the unmodified judge and by AutoLab.</li>"),
-    "limits": (f"<li>{lead}</li>\n" + (f"    <li>{held_txt}</li>\n" if held else "") + f"    <li>The last stage ranks candidates on unrounded output from a private "
-               f"HotSpot build. Every number on this page comes from the unmodified judge and from AutoLab. HotSpot's "
-               f"default stopping rule leaves about {err:.4f} C of error on the binding die "
-               f"(state/official/convergence_check.json), much smaller than the {c2(first['gpu'] - ours['gpu'])} C "
-               f"this stage found.</li>"),
+    "limits": (f"<li>{lead}</li>\n" + (f"    <li>{held_txt(html_code)}</li>\n" if held else "") + f"    <li>The last stage ranks candidates on unrounded output from a private "
+               f"HotSpot build. Every number on this page comes from the unmodified judge and from AutoLab. "
+               f"{conv_txt} ({html_code('state/official/convergence_check.json')}), much smaller than the "
+               f"{c2(first['gpu'] - ours['gpu'])} C this stage found.</li>"),
+    "mesh128": f"<li>{mesh_txt}</li>",
 }
 
 
@@ -160,6 +197,10 @@ ct = re.sub(r"Result on the organizer's HotSpot pipeline \(64 x 64\):.*?\n",
             f"Result on the organizer's HotSpot pipeline (64 x 64): {s5(ours['score'])} (GPU {c2(ours['gpu'])} C, "
             f"HBM {c2(ours['hbm'])} C), {card_rank.split(' (')[0]} at {T} ET, official score identical to our local "
             f"judge.\n", ct)
+ct, n = re.subn(r"finds the last [0-9.]+ C on the hottest GPU \([0-9.]+ C to [0-9.]+ C\)",
+                f"finds the last {c2(first['gpu'] - ours['gpu'])} C on the hottest GPU ({c2(first['gpu'])} C to "
+                f"{c2(ours['gpu'])} C)", ct)
+assert n == 1, "card fine-pass sentence not found"
 card.write_text(ct)
 
 vd = ROOT / "video" / "data.json"
